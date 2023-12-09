@@ -1,7 +1,7 @@
 defmodule GraphQL.Mixfile do
   use Mix.Project
 
-  @version "0.4"
+  @version "0.4.0"
 
   @description "GraphQL Elixir implementation"
   @repo_url "https://github.com/graphql-elixir/graphql"
@@ -31,15 +31,13 @@ defmodule GraphQL.Mixfile do
   defp deps do
     [
       {:mix_test_watch, "~> 0.2", only: :dev},
-      {:credo, "~> 0.3", only: :dev},
-      {:dogma, "~> 0.1", only: :dev},
+      {:credo, "~> 1.7", only: [:test, :dev], runtime: false},
 
       # Doc dependencies
-      {:earmark, "~> 0.2", only: :dev},
-      {:ex_doc, "~> 0.11", only: :dev},
-      {:inch_ex, "~> 0.5", only: :dev},
-      {:dialyxir, "~> 0.3", only: [:dev]},
-      {:poison, "~> 1.5 or ~> 2.0", only: [:dev, :test]}
+      {:earmark, "~> 1.4", only: :dev},
+      {:ex_doc, "~> 0.30", only: :dev},
+      {:dialyxir, "~> 1.4", only: [:dev]},
+      {:poison, "~> 5.0", only: [:dev, :test]}
     ]
   end
 

@@ -87,7 +87,7 @@ defmodule GraphQL.Schema do
           |> reduce_types(fieldtype.type)
         end)
 
-      typemap =
+      # typemap =
         Enum.reduce(type.interfaces, typemap, fn fieldtype, map ->
           reduce_types(map, fieldtype)
         end)
@@ -101,7 +101,7 @@ defmodule GraphQL.Schema do
       typemap = Map.put(typemap, type.name, type)
       thunk_fields = CompositeType.get_fields(type)
 
-      typemap =
+      # typemap =
         Enum.reduce(thunk_fields, typemap, fn {_, fieldtype}, typemap ->
           _reduce_arguments(typemap, fieldtype)
           |> reduce_types(fieldtype.type)

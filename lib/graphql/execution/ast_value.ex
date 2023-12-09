@@ -58,10 +58,10 @@ defmodule GraphQL.Execution.ASTValue do
   def value_from_ast(nil, _, _), do: nil
 
   def value_from_ast(value_ast, type, variable_values) when is_atom(type) do
-    value_from_ast(value_ast, type.type, variable_values)
+    value_from_ast(value_ast, type, variable_values)
   end
 
   def value_from_ast(value_ast, type, _) do
-    GraphQL.Types.parse_literal(type, value_ast.value)
+    GraphQL.Types.parse_literal(type.type, value_ast.value)
   end
 end

@@ -16,7 +16,7 @@ defmodule GraphQL.Lang.Lexer do
 
   """
   def tokenize(input_string) when is_binary(input_string) do
-    input_string |> to_char_list |> tokenize
+    input_string |> to_charlist() |> tokenize()
   end
 
   def tokenize(input_string) do

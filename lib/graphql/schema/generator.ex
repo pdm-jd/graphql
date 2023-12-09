@@ -56,7 +56,7 @@ defmodule GraphQL.Schema.Generator do
                 }
               }
     """
-    |> String.strip()
+    |> String.trim()
   end
 
   def walk_ast(input = %{kind: :InputValueDefinition}) do

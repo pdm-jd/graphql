@@ -22,13 +22,14 @@ defmodule GraphQL.Validation.Validator do
   @doc """
   Short circuits the validations entirely when there are no rules specified.
   This is useful for examining the performance impact of validations.
+
+  For performance testing with a single rule, the overhead of the ParallelVisitor
+  can be removed.
+
+  Runs validations against the document with only the specified rules.
   """
   def validate_with_rules(_schema, _document, rules) when length(rules) == 0, do: :ok
 
-  @doc """
-  For performance testing with a single rule, the overhead of the ParallelVisitor
-  can be removed.
-  """
   def validate_with_rules(schema, document, [rule | []] = rules) when length(rules) == 1 do
     schema = Schema.with_type_cache(schema)
 
@@ -55,9 +56,6 @@ defmodule GraphQL.Validation.Validator do
     end
   end
 
-  @doc """
-  Runs validations against the document with only the specified rules.
-  """
   def validate_with_rules(schema, document, rules) do
     schema = Schema.with_type_cache(schema)
 

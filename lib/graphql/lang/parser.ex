@@ -40,10 +40,10 @@ defmodule GraphQL.Lang.Parser do
   """
   @spec parse(String.t()) :: {:ok, GraphQL.Document.t()} | {:error, GraphQL.Errors.t()}
   def parse(input_string) when is_binary(input_string) do
-    input_string |> to_char_list |> parse
+    input_string |> to_charlist() |> parse()
   end
 
-  @spec parse(char_list) :: {:ok, GraphQL.Document.t()} | {:error, GraphQL.Errors.t()}
+  @spec parse(charlist()) :: {:ok, GraphQL.Document.t()} | {:error, GraphQL.Errors.t()}
   def parse(input_string) do
     case input_string |> Lexer.tokenize() |> :graphql_parser.parse() do
       {:ok, parse_result} ->
