@@ -1,19 +1,17 @@
 defmodule GraphQL.Type.Interface do
-
   alias GraphQL.Type.AbstractType
 
   @type t :: %GraphQL.Type.Interface{
-    name: binary,
-    description: binary | nil,
-    fields: Map.t | function,
-    resolver: (any -> GraphQL.Type.ObjectType.t) | nil
-  }
+          name: binary,
+          description: binary | nil,
+          fields: Map.t() | function,
+          resolver: (any -> GraphQL.Type.ObjectType.t()) | nil
+        }
   defstruct name: "", description: "", fields: %{}, resolver: nil
 
   def new(map) do
     struct(GraphQL.Type.Interface, map)
   end
-
 
   defimpl AbstractType do
     @doc """
@@ -35,7 +33,7 @@ defmodule GraphQL.Type.Interface do
       |> Enum.filter(fn {_, typedef} -> GraphQL.Type.implements?(typedef, interface) end)
       # then return the type, instead of the {name, type} tuple that comes from
       # the type_cache
-      |> Enum.map(fn({_,v}) -> v end)
+      |> Enum.map(fn {_, v} -> v end)
     end
 
     @doc """
@@ -49,7 +47,7 @@ defmodule GraphQL.Type.Interface do
         interface.resolver.(object)
       else
         AbstractType.possible_types(interface, schema)
-        |> Enum.find(fn(x) -> x.isTypeOf.(object) end)
+        |> Enum.find(fn x -> x.isTypeOf.(object) end)
       end
     end
   end
@@ -67,4 +65,3 @@ defmodule GraphQL.Type.Interface do
     end
   end
 end
-

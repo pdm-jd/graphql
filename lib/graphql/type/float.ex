@@ -1,19 +1,23 @@
 defmodule GraphQL.Type.Float do
   @type t :: %GraphQL.Type.Float{name: binary, description: binary}
-  defstruct name: "Float", description:
-    """
-    The `Float` scalar type represents signed double-precision fractional
-    values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).
-    """ |> GraphQL.Util.Text.normalize
+  defstruct name: "Float",
+            description:
+              """
+              The `Float` scalar type represents signed double-precision fractional
+              values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).
+              """
+              |> GraphQL.Util.Text.normalize()
 
   def coerce(false), do: 0
   def coerce(true), do: 1
+
   def coerce(value) when is_binary(value) do
     case Float.parse(value) do
       :error -> nil
       {v, _} -> coerce(v)
     end
   end
+
   def coerce(value) do
     value * 1.0
   end

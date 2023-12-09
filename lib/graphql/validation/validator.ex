@@ -1,6 +1,4 @@
-
 defmodule GraphQL.Validation.Validator do
-
   alias GraphQL.Lang.AST.{
     CompositeVisitor,
     ParallelVisitor,
@@ -18,7 +16,7 @@ defmodule GraphQL.Validation.Validator do
   Runs validations against the document with all known validation rules.
   """
   def validate(schema, document) do
-    validate_with_rules(schema, document, Rules.all)
+    validate_with_rules(schema, document, Rules.all())
   end
 
   @doc """
@@ -31,19 +29,25 @@ defmodule GraphQL.Validation.Validator do
   For performance testing with a single rule, the overhead of the ParallelVisitor
   can be removed.
   """
-  def validate_with_rules(schema, document, [rule|[]] = rules) when length(rules) == 1 do
+  def validate_with_rules(schema, document, [rule | []] = rules) when length(rules) == 1 do
     schema = Schema.with_type_cache(schema)
-    validation_pipeline = CompositeVisitor.compose([
-      %TypeInfoVisitor{},
-      rule
-    ])
-    result = Reducer.reduce(document, validation_pipeline, %{
-      type_info: %TypeInfo{schema: schema},
-      document_info: DocumentInfo.new(schema, document),
-      document: document,
-      validation_errors: []
-    })
+
+    validation_pipeline =
+      CompositeVisitor.compose([
+        %TypeInfoVisitor{},
+        rule
+      ])
+
+    result =
+      Reducer.reduce(document, validation_pipeline, %{
+        type_info: %TypeInfo{schema: schema},
+        document_info: DocumentInfo.new(schema, document),
+        document: document,
+        validation_errors: []
+      })
+
     errors = result[:validation_errors]
+
     if length(errors) > 0 do
       {:error, Enum.reverse(errors)}
     else
@@ -56,17 +60,23 @@ defmodule GraphQL.Validation.Validator do
   """
   def validate_with_rules(schema, document, rules) do
     schema = Schema.with_type_cache(schema)
-    validation_pipeline = CompositeVisitor.compose([
-      %TypeInfoVisitor{},
-      %ParallelVisitor{visitors: rules}
-    ])
-    result = Reducer.reduce(document, validation_pipeline, %{
-      type_info: %TypeInfo{schema: schema},
-      document_info: DocumentInfo.new(schema, document),
-      document: document,
-      validation_errors: []
-    })
+
+    validation_pipeline =
+      CompositeVisitor.compose([
+        %TypeInfoVisitor{},
+        %ParallelVisitor{visitors: rules}
+      ])
+
+    result =
+      Reducer.reduce(document, validation_pipeline, %{
+        type_info: %TypeInfo{schema: schema},
+        document_info: DocumentInfo.new(schema, document),
+        document: document,
+        validation_errors: []
+      })
+
     errors = result[:validation_errors]
+
     if length(errors) > 0 do
       {:error, Enum.reverse(errors)}
     else

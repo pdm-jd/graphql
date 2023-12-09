@@ -1,8 +1,10 @@
 defmodule GraphQL.Type.JSON do
-  defstruct name: "JSON", description:
-    """
-    The `JSON` type represents dynamic objects in JSON.
-    """ |> GraphQL.Util.Text.normalize
+  defstruct name: "JSON",
+            description:
+              """
+              The `JSON` type represents dynamic objects in JSON.
+              """
+              |> GraphQL.Util.Text.normalize()
 
   def coerce(value), do: value
 end

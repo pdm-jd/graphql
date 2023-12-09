@@ -1,4 +1,3 @@
-
 defmodule GraphQL.Execution.Executor.MutationsTest do
   use ExUnit.Case, async: true
 
@@ -26,23 +25,23 @@ defmodule GraphQL.Execution.Executor.MutationsTest do
         query: %ObjectType{
           name: "Query",
           fields: %{
-            theNumber: %{type: NumberHolder.type}
+            theNumber: %{type: NumberHolder.type()}
           }
         },
         mutation: %ObjectType{
           name: "Mutation",
           fields: %{
             changeTheNumber: %{
-              type: NumberHolder.type,
-              args: %{ newNumber: %{ type: %Int{} }},
-              resolve: fn(source, %{ newNumber: newNumber }) ->
+              type: NumberHolder.type(),
+              args: %{newNumber: %{type: %Int{}}},
+              resolve: fn source, %{newNumber: newNumber} ->
                 Map.put(source, :theNumber, newNumber)
               end
             },
             failToChangeTheNumber: %{
-              type: NumberHolder.type,
-              args: %{ newNumber: %{ type: %Int{} }},
-              resolve: fn(_, %{ newNumber: _ }) ->
+              type: NumberHolder.type(),
+              args: %{newNumber: %{type: %Int{}}},
+              resolve: fn _, %{newNumber: _} ->
                 raise "Cannot change the number"
               end
             }
@@ -67,12 +66,12 @@ defmodule GraphQL.Execution.Executor.MutationsTest do
       }
     """
 
-    {:ok, result} = execute(TestSchema.schema, doc)
+    {:ok, result} = execute(TestSchema.schema(), doc)
 
     assert_data(result, %{
       first: %{theNumber: 1},
       second: %{theNumber: 2},
-      third: %{theNumber: 3},
+      third: %{theNumber: 3}
     })
   end
 
@@ -91,7 +90,7 @@ defmodule GraphQL.Execution.Executor.MutationsTest do
       }
     """
 
-    {:ok, result} = execute(TestSchema.schema, doc)
+    {:ok, result} = execute(TestSchema.schema(), doc)
 
     assert_data(result, %{
       first: %{
@@ -106,4 +105,3 @@ defmodule GraphQL.Execution.Executor.MutationsTest do
     assert_has_error(result, %{"message" => "Cannot change the number"})
   end
 end
-

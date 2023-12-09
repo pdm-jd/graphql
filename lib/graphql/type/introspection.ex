@@ -1,5 +1,4 @@
 defmodule GraphQL.Type.Introspection do
-
   alias GraphQL.Type.ObjectType
   alias GraphQL.Type.Interface
   alias GraphQL.Type.Input
@@ -30,34 +29,38 @@ defmodule GraphQL.Type.Introspection do
           A GraphQL Schema defines the capabilities of a GraphQL server. It
           exposes all available types and directives on the server, as well as
           the entry points for query, mutation, and subscription operations.
-          """ |> Text.normalize,
+          """
+          |> Text.normalize(),
         fields: %{
           types: %{
             description: "A list of all types supported by this server.",
             type: %NonNull{ofType: %List{ofType: %NonNull{ofType: Type}}},
-            resolve: fn(schema) ->
+            resolve: fn schema ->
               Map.values(schema.type_cache)
             end
           },
           queryType: %{
             description: "The type that query operations will be rooted at.",
             type: %NonNull{ofType: Type},
-            resolve: fn(%{query: query}) -> query end
+            resolve: fn %{query: query} -> query end
           },
           mutationType: %{
-            description: "If this server supports mutation, the type that mutation operations will be rooted at.",
+            description:
+              "If this server supports mutation, the type that mutation operations will be rooted at.",
             type: Type,
-            resolve: fn(%{mutation: mutation}) -> mutation end
+            resolve: fn %{mutation: mutation} -> mutation end
           },
           subscriptionType: %{
-            description: "If this server support subscription, the type that subscription operations will be rooted at.",
+            description:
+              "If this server support subscription, the type that subscription operations will be rooted at.",
             type: Type,
-            resolve: nil #fn(%{subscription: subscription}, _, _,_) -> subscription end
+            # fn(%{subscription: subscription}, _, _,_) -> subscription end
+            resolve: nil
           },
           directives: %{
             description: "A list of all directives supported by this server.",
             type: %NonNull{ofType: %List{ofType: %NonNull{ofType: Directive}}},
-            resolve: fn(schema, _, _) ->
+            resolve: fn schema, _, _ ->
               schema.directives
             end
           }
@@ -79,7 +82,8 @@ defmodule GraphQL.Type.Introspection do
           execution behavior in ways field arguments will not suffice, such as
           conditionally including or skipping a field. Directives provide this by
           describing additional information to the executor
-          """ |> Text.normalize,
+          """
+          |> Text.normalize(),
         fields: %{
           name: %{type: %NonNull{ofType: %String{}}},
           description: %{type: %String{}},
@@ -88,12 +92,14 @@ defmodule GraphQL.Type.Introspection do
             resolve: fn
               %{args: args}, _, _ ->
                 Enum.map(args, fn {name, v} -> Map.put(v, :name, name) end)
-              _, _, _ ->  []
+
+              _, _, _ ->
+                []
             end
           },
           onOperation: %{type: %NonNull{ofType: %Boolean{}}},
           onFragment: %{type: %NonNull{ofType: %Boolean{}}},
-          onField: %{type: %NonNull{ofType: %Boolean{}}},
+          onField: %{type: %NonNull{ofType: %Boolean{}}}
         }
       }
     end
@@ -114,11 +120,12 @@ defmodule GraphQL.Type.Introspection do
           Object and Interface types provide the fields they describe. Abstract
           types, Union and Interface, provide the Object types possible
           at runtime. List and NonNull types compose other types.
-          """ |> Text.normalize,
+          """
+          |> Text.normalize(),
         fields: %{
           kind: %{
             type: %NonNull{ofType: TypeKind},
-            resolve: fn(schema) ->
+            resolve: fn schema ->
               case schema do
                 %ObjectType{} -> "OBJECT"
                 %Interface{} -> "INTERFACE"
@@ -143,54 +150,65 @@ defmodule GraphQL.Type.Introspection do
             type: %List{ofType: %NonNull{ofType: Field}},
             args: %{includeDeprecated: %{type: %Boolean{}, defaultValue: false}},
             resolve: fn
-              (%ObjectType{} = schema) ->
+              %ObjectType{} = schema ->
                 thunk_fields = CompositeType.get_fields(schema)
-                Enum.map(thunk_fields, fn({n, v}) -> Map.put(v, :name, n) end)
-                # |> filter_deprecated
-              (%Interface{} = schema) ->
+                Enum.map(thunk_fields, fn {n, v} -> Map.put(v, :name, n) end)
+
+              # |> filter_deprecated
+              %Interface{} = schema ->
                 thunk_fields = CompositeType.get_fields(schema)
-                Enum.map(thunk_fields, fn({n, v}) -> Map.put(v, :name, n) end)
-              (_) -> nil
+                Enum.map(thunk_fields, fn {n, v} -> Map.put(v, :name, n) end)
+
+              _ ->
+                nil
             end
           },
           interfaces: %{
             type: %List{ofType: %NonNull{ofType: Type}},
             resolve: fn
-              (%ObjectType{} = schema) ->
+              %ObjectType{} = schema ->
                 schema.interfaces
-              (_) -> nil
+
+              _ ->
+                nil
             end
           },
           possibleTypes: %{
             type: %List{ofType: %NonNull{ofType: Type}},
             resolve: fn
-              (%GraphQL.Type.Interface{name: _name} = interface, _args, info) ->
+              %GraphQL.Type.Interface{name: _name} = interface, _args, info ->
                 AbstractType.possible_types(interface, info.schema)
-              (%GraphQL.Type.Union{name: name}, _args, info) ->
+
+              %GraphQL.Type.Union{name: name}, _args, info ->
                 info.schema.type_cache[name].types
-              (_, _, _) -> nil
+
+              _, _, _ ->
+                nil
             end
           },
           enumValues: %{
             type: %List{ofType: %NonNull{ofType: EnumValue}},
             args: %{includeDeprecated: %{type: %Boolean{}, defaultValue: false}},
             resolve: fn
-              (%GraphQL.Type.Enum{} = schema) -> schema.values
-              (_) -> nil
+              %GraphQL.Type.Enum{} = schema -> schema.values
+              _ -> nil
             end
           },
           inputFields: %{
             type: %List{ofType: %NonNull{ofType: InputValue}},
             resolve: fn
-              (%GraphQL.Type.Input{} = type) ->
+              %GraphQL.Type.Input{} = type ->
                 fields = type.fields
-                Enum.map(Map.keys(fields), fn(key) ->
+
+                Enum.map(Map.keys(fields), fn key ->
                   %{
                     name: key,
                     type: fields[key].type
                   }
                 end)
-              (_) -> nil
+
+              _ ->
+                nil
             end
           },
           ofType: %{type: Type}
@@ -211,11 +229,13 @@ defmodule GraphQL.Type.Introspection do
           },
           OBJECT: %{
             value: "OBJECT",
-            description: "Indicates this type is an object. `fields` and `interfaces` are valid fields."
+            description:
+              "Indicates this type is an object. `fields` and `interfaces` are valid fields."
           },
           INTERFACE: %{
             value: "INTERFACE",
-            description: "Indicates this type is an interface. `fields` and `possibleTypes` are valid fields."
+            description:
+              "Indicates this type is an interface. `fields` and `possibleTypes` are valid fields."
           },
           UNION: %{
             value: "UNION",
@@ -238,7 +258,8 @@ defmodule GraphQL.Type.Introspection do
             description: "Indicates this type is a non-null. `ofType` is a valid field."
           }
         }
-      } |> GraphQL.Type.Enum.new
+      }
+      |> GraphQL.Type.Enum.new()
     end
   end
 
@@ -250,7 +271,8 @@ defmodule GraphQL.Type.Introspection do
           """
           Object and Interface types are described by a list of Fields, each of
           which has a name, potentially a list of arguments, and a return type.
-          """ |> Text.normalize,
+          """
+          |> Text.normalize(),
         fields: %{
           name: %{type: %NonNull{ofType: %String{}}},
           description: %{type: %String{}},
@@ -259,7 +281,9 @@ defmodule GraphQL.Type.Introspection do
             resolve: fn
               %{args: args} ->
                 Enum.map(args, fn {name, v} -> Map.put(v, :name, name) end)
-              _ -> []
+
+              _ ->
+                []
             end
           },
           type: %{type: %NonNull{ofType: Type}},
@@ -282,14 +306,16 @@ defmodule GraphQL.Type.Introspection do
           Arguments provided to Fields or Directives and the input fields of an
           InputObject are represented as Input Values which describe their type
           and optionally a default value.
-          """ |> Text.normalize,
+          """
+          |> Text.normalize(),
         fields: %{
           name: %{type: %NonNull{ofType: %String{}}},
           description: %{type: %String{}},
           type: %{type: %NonNull{ofType: Type}},
           defaultValue: %{
             type: %String{},
-            description: "A GraphQL-formatted string representing the default value for this input value."
+            description:
+              "A GraphQL-formatted string representing the default value for this input value."
             # resolve: inputVal => isNullish(inputVal.defaultValue) ?
             #   null :
             #   print(astFromValue(inputVal.defaultValue, inputVal))
@@ -308,7 +334,8 @@ defmodule GraphQL.Type.Introspection do
           One possible value for a given Enum. Enum values are unique values, not
           a placeholder for a string or numeric value. However an Enum value is
           returned in a JSON response as a string.
-          """ |> Text.normalize,
+          """
+          |> Text.normalize(),
         fields: %{
           name: %{type: %NonNull{ofType: %String{}}},
           description: %{type: %String{}},
@@ -412,7 +439,7 @@ defmodule GraphQL.Type.Introspection do
       args: %{
         name: %{type: %NonNull{ofType: %String{}}}
       },
-      resolve: fn(_, %{name: name}, %{schema: schema}) ->
+      resolve: fn _, %{name: name}, %{schema: schema} ->
         schema.type_cache[name]
       end
     }
@@ -424,8 +451,8 @@ defmodule GraphQL.Type.Introspection do
       type: %NonNull{ofType: %String{}},
       description: "The name of the current Object type at runtime.",
       resolve: fn
-        (_, _, %{parent_type: %{name: name}}) -> name
-        (_, _, %{parent_type: module}) -> apply(module, :type, [])
+        _, _, %{parent_type: %{name: name}} -> name
+        _, _, %{parent_type: module} -> apply(module, :type, [])
       end
     }
   end
@@ -435,7 +462,7 @@ defmodule GraphQL.Type.Introspection do
       name: "__schema",
       type: %NonNull{ofType: Schema},
       description: "Access the current type schema of this server.",
-      resolve: fn(_, _, args) -> args.schema end
+      resolve: fn _, _, args -> args.schema end
     }
   end
 end

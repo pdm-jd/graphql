@@ -5,6 +5,7 @@ defmodule GraphQL.Lang.Lexer.LexerTest do
     case :graphql_lexer.string(input) do
       {:ok, output, _} ->
         assert output == tokens
+
       {:error, {_, :graphql_lexer, output}, _} ->
         assert output == tokens
     end
@@ -12,123 +13,132 @@ defmodule GraphQL.Lang.Lexer.LexerTest do
 
   # Ignored tokens
   test "WhiteSpace is ignored" do
-    assert_tokens '\u0009', [] # horizontal tab
-    assert_tokens '\u000B', [] # vertical tab
-    assert_tokens '\u000C', [] # form feed
-    assert_tokens '\u0020', [] # space
-    assert_tokens '\u00A0', [] # non-breaking space
+    # horizontal tab
+    assert_tokens(~c"\u0009", [])
+    # vertical tab
+    assert_tokens(~c"\u000B", [])
+    # form feed
+    assert_tokens(~c"\u000C", [])
+    # space
+    assert_tokens(~c"\u0020", [])
+    # non-breaking space
+    assert_tokens(~c"\u00A0", [])
   end
 
   test "LineTerminator is ignored" do
-    assert_tokens '\u000A', [] # new line
-    assert_tokens '\u000D', [] # carriage return
-    assert_tokens '\u2028', [] # line separator
-    assert_tokens '\u2029', [] # paragraph separator
+    # new line
+    assert_tokens(~c"\u000A", [])
+    # carriage return
+    assert_tokens(~c"\u000D", [])
+    # line separator
+    assert_tokens(~c"\u2028", [])
+    # paragraph separator
+    assert_tokens(~c"\u2029", [])
   end
 
   test "Comment is ignored" do
-    assert_tokens '# some comment', []
+    assert_tokens(~c"# some comment", [])
   end
 
   test "Comma is ignored" do
-    assert_tokens ',', []
+    assert_tokens(~c",", [])
   end
 
   # Lexical tokens
   test "Punctuator" do
-    assert_tokens '!',              [{ :"!", 1 }]
-    assert_tokens '$',              [{ :"$", 1 }]
-    assert_tokens '(',              [{ :"(", 1 }]
-    assert_tokens ')',              [{ :")", 1 }]
-    assert_tokens ':',              [{ :":", 1 }]
-    assert_tokens '=',              [{ :"=", 1 }]
-    assert_tokens ':',              [{ :":", 1 }]
-    assert_tokens '@',              [{ :"@", 1 }]
-    assert_tokens '[',              [{ :"[", 1 }]
-    assert_tokens ']',              [{ :"]", 1 }]
-    assert_tokens '{',              [{ :"{", 1 }]
-    assert_tokens '}',              [{ :"}", 1 }]
-    assert_tokens '|',              [{ :"|", 1 }]
-    assert_tokens '...',            [{ :"...", 1  }]
+    assert_tokens(~c"!", [{:!, 1}])
+    assert_tokens(~c"$", [{:"$", 1}])
+    assert_tokens(~c"(", [{:"(", 1}])
+    assert_tokens(~c")", [{:")", 1}])
+    assert_tokens(~c":", [{:":", 1}])
+    assert_tokens(~c"=", [{:=, 1}])
+    assert_tokens(~c":", [{:":", 1}])
+    assert_tokens(~c"@", [{:@, 1}])
+    assert_tokens(~c"[", [{:"[", 1}])
+    assert_tokens(~c"]", [{:"]", 1}])
+    assert_tokens(~c"{", [{:"{", 1}])
+    assert_tokens(~c"}", [{:"}", 1}])
+    assert_tokens(~c"|", [{:|, 1}])
+    assert_tokens(~c"...", [{:..., 1}])
   end
 
   test "Name" do
-    assert_tokens '_',              [{ :name, 1, '_' }]
-    assert_tokens 'a',              [{ :name, 1, 'a' }]
-    assert_tokens 'Z',              [{ :name, 1, 'Z' }]
-    assert_tokens 'foo',            [{ :name, 1, 'foo' }]
-    assert_tokens 'Foo',            [{ :name, 1, 'Foo' }]
-    assert_tokens '_foo',           [{ :name, 1, '_foo' }]
-    assert_tokens 'foo0',           [{ :name, 1, 'foo0' }]
-    assert_tokens '_fu_Ba_QX_2',    [{ :name, 1, '_fu_Ba_QX_2' }]
+    assert_tokens(~c"_", [{:name, 1, ~c"_"}])
+    assert_tokens(~c"a", [{:name, 1, ~c"a"}])
+    assert_tokens(~c"Z", [{:name, 1, ~c"Z"}])
+    assert_tokens(~c"foo", [{:name, 1, ~c"foo"}])
+    assert_tokens(~c"Foo", [{:name, 1, ~c"Foo"}])
+    assert_tokens(~c"_foo", [{:name, 1, ~c"_foo"}])
+    assert_tokens(~c"foo0", [{:name, 1, ~c"foo0"}])
+    assert_tokens(~c"_fu_Ba_QX_2", [{:name, 1, ~c"_fu_Ba_QX_2"}])
   end
 
   test "Literals" do
-    assert_tokens 'query',          [{ :"query", 1 }]
-    assert_tokens 'mutation',       [{ :"mutation", 1 }]
-    assert_tokens 'fragment',       [{ :"fragment", 1 }]
-    assert_tokens 'on',             [{ :"on", 1 }]
-    assert_tokens 'type',           [{ :"type", 1 }]
+    assert_tokens(~c"query", [{:query, 1}])
+    assert_tokens(~c"mutation", [{:mutation, 1}])
+    assert_tokens(~c"fragment", [{:fragment, 1}])
+    assert_tokens(~c"on", [{:on, 1}])
+    assert_tokens(~c"type", [{:type, 1}])
   end
 
   test "IntValue" do
-    assert_tokens '0',              [{ :int_value, 1, '0' }]
-    assert_tokens '-0',             [{ :int_value, 1, '-0' }]
-    assert_tokens '-1',             [{ :int_value, 1, '-1' }]
-    assert_tokens '2340',           [{ :int_value, 1, '2340' }]
-    assert_tokens '56789',          [{ :int_value, 1, '56789' }]
+    assert_tokens(~c"0", [{:int_value, 1, ~c"0"}])
+    assert_tokens(~c"-0", [{:int_value, 1, ~c"-0"}])
+    assert_tokens(~c"-1", [{:int_value, 1, ~c"-1"}])
+    assert_tokens(~c"2340", [{:int_value, 1, ~c"2340"}])
+    assert_tokens(~c"56789", [{:int_value, 1, ~c"56789"}])
   end
 
   test "FloatValue" do
-    assert_tokens '0.0',            [{ :float_value, 1, '0.0' }]
-    assert_tokens '-0.1',           [{ :float_value, 1, '-0.1' }]
-    assert_tokens '0.1',            [{ :float_value, 1, '0.1' }]
-    assert_tokens '2.340',          [{ :float_value, 1, '2.340' }]
-    assert_tokens '5678.9',         [{ :float_value, 1, '5678.9' }]
-    assert_tokens '1.23e+45',       [{ :float_value, 1, '1.23e+45' }]
-    assert_tokens '1.23E-45',       [{ :float_value, 1, '1.23E-45' }]
-    assert_tokens '0.23E-45',       [{ :float_value, 1, '0.23E-45' }]
+    assert_tokens(~c"0.0", [{:float_value, 1, ~c"0.0"}])
+    assert_tokens(~c"-0.1", [{:float_value, 1, ~c"-0.1"}])
+    assert_tokens(~c"0.1", [{:float_value, 1, ~c"0.1"}])
+    assert_tokens(~c"2.340", [{:float_value, 1, ~c"2.340"}])
+    assert_tokens(~c"5678.9", [{:float_value, 1, ~c"5678.9"}])
+    assert_tokens(~c"1.23e+45", [{:float_value, 1, ~c"1.23e+45"}])
+    assert_tokens(~c"1.23E-45", [{:float_value, 1, ~c"1.23E-45"}])
+    assert_tokens(~c"0.23E-45", [{:float_value, 1, ~c"0.23E-45"}])
   end
 
   test "StringValue" do
-    assert_tokens '""',             [{ :string_value, 1, '""' }]
-    assert_tokens '"a"',            [{ :string_value, 1, '"a"' }]
-    assert_tokens '"\u000f"',       [{ :string_value, 1, '"\u000f"' }]
-    assert_tokens '"\t"',           [{ :string_value, 1, '"\t"' }]
-    assert_tokens '"\\""',          [{ :string_value, 1, '"\\""' }]
-    assert_tokens '"a\\n"',         [{ :string_value, 1, '"a\\n"' }]
+    assert_tokens(~c"\"\"", [{:string_value, 1, ~c"\"\""}])
+    assert_tokens(~c"\"a\"", [{:string_value, 1, ~c"\"a\""}])
+    assert_tokens(~c"\"\u000f\"", [{:string_value, 1, ~c"\"\u000f\""}])
+    assert_tokens(~c"\"\t\"", [{:string_value, 1, ~c"\"\t\""}])
+    assert_tokens(~c"\"\\\"\"", [{:string_value, 1, ~c"\"\\\"\""}])
+    assert_tokens(~c"\"a\\n\"", [{:string_value, 1, ~c"\"a\\n\""}])
   end
 
   test "BooleanValue" do
-    assert_tokens 'true',           [{ :boolean_value, 1, 'true' }]
-    assert_tokens 'false',          [{ :boolean_value, 1, 'false' }]
+    assert_tokens(~c"true", [{:boolean_value, 1, ~c"true"}])
+    assert_tokens(~c"false", [{:boolean_value, 1, ~c"false"}])
   end
 
   test "EnumValue" do
-    assert_tokens 'null',           [{ :null, 1 }]
-    assert_tokens 'ENUM_VALUE',     [{ :name, 1, 'ENUM_VALUE' }]
-    assert_tokens 'enum_value',     [{ :name, 1, 'enum_value' }]
+    assert_tokens(~c"null", [{:null, 1}])
+    assert_tokens(~c"ENUM_VALUE", [{:name, 1, ~c"ENUM_VALUE"}])
+    assert_tokens(~c"enum_value", [{:name, 1, ~c"enum_value"}])
   end
 
   # Sample GraphQL
   test "Simple statement" do
-    assert_tokens '{ hero }', [
-      { :"{", 1 },
-      { :name, 1, 'hero' },
-      { :"}", 1 }
-    ]
+    assert_tokens(~c"{ hero }", [
+      {:"{", 1},
+      {:name, 1, ~c"hero"},
+      {:"}", 1}
+    ])
   end
 
   test "Named query with nested selection set" do
-    assert_tokens 'query myName { me { name } }', [
-      {:'query', 1},
-      {:name, 1, 'myName'},
-      {:'{', 1},
-      {:name, 1, 'me'},
-      {:'{', 1},
-      {:name, 1, 'name'},
-      {:'}', 1},
-      {:'}', 1}
-    ]
+    assert_tokens(~c"query myName { me { name } }", [
+      {:query, 1},
+      {:name, 1, ~c"myName"},
+      {:"{", 1},
+      {:name, 1, ~c"me"},
+      {:"{", 1},
+      {:name, 1, ~c"name"},
+      {:"}", 1},
+      {:"}", 1}
+    ])
   end
 end

@@ -1,4 +1,3 @@
-
 defimpl GraphQL.Execution.Completion, for: Any do
   alias GraphQL.Execution.Types
 
@@ -6,4 +5,3 @@ defimpl GraphQL.Execution.Completion, for: Any do
     {context, GraphQL.Types.serialize(Types.unwrap_type(return_type), result)}
   end
 end
-

@@ -1,4 +1,3 @@
-
 defmodule GraphQL.Lang.AST.ParallelVisitor do
   @moduledoc ~S"""
   A ParallelVisitor runs all child visitors in parallel instead of serially like the CompositeVisitor.
@@ -18,19 +17,25 @@ defmodule GraphQL.Lang.AST.ParallelVisitor do
   }
 
   defstruct visitors: []
-  
+
   defimpl Visitor do
     def enter(visitor, node, accumulator) do
-      visitors = Enum.filter(visitor.visitors, fn(child_visitor) ->
-        !skipping?(accumulator, child_visitor)
-      end)
-      accumulator = Enum.reduce(visitors, accumulator, fn(child_visitor, accumulator) ->
-        case child_visitor |> Visitor.enter(node, accumulator) do
-          {:continue, next_accumulator} -> next_accumulator
-          {:skip, next_accumulator} ->
-            put_in(next_accumulator[:skipping][child_visitor], node)
-        end
-      end)
+      visitors =
+        Enum.filter(visitor.visitors, fn child_visitor ->
+          !skipping?(accumulator, child_visitor)
+        end)
+
+      accumulator =
+        Enum.reduce(visitors, accumulator, fn child_visitor, accumulator ->
+          case child_visitor |> Visitor.enter(node, accumulator) do
+            {:continue, next_accumulator} ->
+              next_accumulator
+
+            {:skip, next_accumulator} ->
+              put_in(next_accumulator[:skipping][child_visitor], node)
+          end
+        end)
+
       if length(visitors) > 0 do
         {:continue, accumulator}
       else
@@ -39,15 +44,18 @@ defmodule GraphQL.Lang.AST.ParallelVisitor do
     end
 
     def leave(visitor, node, accumulator) do
-      Enum.reduce visitor.visitors, accumulator, fn(child_visitor, accumulator) ->
+      Enum.reduce(visitor.visitors, accumulator, fn child_visitor, accumulator ->
         cond do
           !skipping?(accumulator, child_visitor) ->
             child_visitor |> Visitor.leave(node, accumulator)
+
           accumulator[:skipping][child_visitor] == node ->
             Map.delete(accumulator[:skipping], child_visitor)
-          true -> accumulator
+
+          true ->
+            accumulator
         end
-      end
+      end)
     end
 
     defp skipping?(accumulator, child_visitor) do
@@ -67,5 +75,4 @@ defmodule GraphQL.Lang.AST.ParallelVisitor do
       Enum.reduce(visitor.visitors, accumulator, &PostprocessingVisitor.finish/2)
     end
   end
-
 end

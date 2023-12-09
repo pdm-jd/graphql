@@ -20,12 +20,12 @@ defmodule GraphQL.Lang.Type.UnionInterfaceTest do
   end
 
   def named_type do
-    GraphQL.Type.Interface.new %{
+    GraphQL.Type.Interface.new(%{
       name: "Named",
-      fields:  %{
+      fields: %{
         name: %{type: %String{}}
       }
-    }
+    })
   end
 
   def dog_type do
@@ -33,10 +33,13 @@ defmodule GraphQL.Lang.Type.UnionInterfaceTest do
       name: "Dog",
       interfaces: [named_type],
       fields: %{
-       name: %{type: %String{}},
-       barks: %{type: %Boolean{}}
+        name: %{type: %String{}},
+        barks: %{type: %Boolean{}}
       },
-      isTypeOf: fn (%Dog{}) -> true; (_) -> false end
+      isTypeOf: fn
+        %Dog{} -> true
+        _ -> false
+      end
     }
   end
 
@@ -45,22 +48,25 @@ defmodule GraphQL.Lang.Type.UnionInterfaceTest do
       name: "Cat",
       interfaces: [named_type],
       fields: %{
-       name: %{type: %String{}},
-       meows: %{type: %Boolean{}}
+        name: %{type: %String{}},
+        meows: %{type: %Boolean{}}
       },
-      isTypeOf: fn (%Cat{}) -> true; (_) -> false end
+      isTypeOf: fn
+        %Cat{} -> true
+        _ -> false
+      end
     }
   end
 
   def pet_type do
-    GraphQL.Type.Union.new %{
+    GraphQL.Type.Union.new(%{
       name: "Pet",
       types: [dog_type, cat_type],
       resolver: fn
-        (%Dog{}) -> dog_type
-        (%Cat{}) -> cat_type
+        %Dog{} -> dog_type
+        %Cat{} -> cat_type
       end
-    }
+    })
   end
 
   def person_type do
@@ -70,9 +76,12 @@ defmodule GraphQL.Lang.Type.UnionInterfaceTest do
       fields: %{
         name: %{type: %String{}},
         pets: %{type: %List{ofType: pet_type}},
-        friends: %{type: %List{ofType: named_type}},
+        friends: %{type: %List{ofType: named_type}}
       },
-      isTypeOf: fn (%Person{}) -> true; (_) -> false end
+      isTypeOf: fn
+        %Person{} -> true
+        _ -> false
+      end
     }
   end
 
@@ -83,7 +92,7 @@ defmodule GraphQL.Lang.Type.UnionInterfaceTest do
   def garfield, do: %Cat{name: "Garfield", meows: false}
   def odie, do: %Dog{name: "Odie", barks: true}
   def liz, do: %Person{name: "Liz"}
-  def john, do: %Person{name: "John", pets: [ odie, garfield ], friends: [liz, odie]}
+  def john, do: %Person{name: "John", pets: [odie, garfield], friends: [liz, odie]}
 
   test "can introspect on union and intersection types" do
     query = """
@@ -108,19 +117,31 @@ defmodule GraphQL.Lang.Type.UnionInterfaceTest do
         }
       }
     """
+
     {:ok, result} = execute(schema, query)
-    assert_data(result,
-      %{"Named" => %{"enumValues" => nil,
-                  "fields" => [%{"name" => "name"}],
-                  "inputFields" => nil, "interfaces" => nil,
-                  "kind" => "INTERFACE", "name" => "Named",
-                  "possibleTypes" => [%{"name" => "Cat"},
-                   %{"name" => "Dog"}, %{"name" => "Person"}]},
-                "Pet" => %{"enumValues" => nil, "fields" => nil,
-                  "inputFields" => nil, "interfaces" => nil,
-                  "kind" => "UNION", "name" => "Pet",
-                  "possibleTypes" => [%{"name" => "Dog"},
-                   %{"name" => "Cat"}]}}
+
+    assert_data(
+      result,
+      %{
+        "Named" => %{
+          "enumValues" => nil,
+          "fields" => [%{"name" => "name"}],
+          "inputFields" => nil,
+          "interfaces" => nil,
+          "kind" => "INTERFACE",
+          "name" => "Named",
+          "possibleTypes" => [%{"name" => "Cat"}, %{"name" => "Dog"}, %{"name" => "Person"}]
+        },
+        "Pet" => %{
+          "enumValues" => nil,
+          "fields" => nil,
+          "inputFields" => nil,
+          "interfaces" => nil,
+          "kind" => "UNION",
+          "name" => "Pet",
+          "possibleTypes" => [%{"name" => "Dog"}, %{"name" => "Cat"}]
+        }
+      }
     )
   end
 
@@ -140,8 +161,11 @@ defmodule GraphQL.Lang.Type.UnionInterfaceTest do
     """
 
     {:ok, result} = execute(schema, query, root_value: john, validate: false)
-    assert_data(result,
-      %{"__typename" => "Person",
+
+    assert_data(
+      result,
+      %{
+        "__typename" => "Person",
         "name" => "John",
         "pets" => [
           %{"__typename" => "Dog", "barks" => true, "name" => "Odie"},
@@ -171,8 +195,11 @@ defmodule GraphQL.Lang.Type.UnionInterfaceTest do
     """
 
     {:ok, result} = execute(schema, query, root_value: john, validate: false)
-    assert_data(result,
-      %{"__typename" => "Person",
+
+    assert_data(
+      result,
+      %{
+        "__typename" => "Person",
         "name" => "John",
         "pets" => [
           %{"__typename" => "Dog", "barks" => true, "name" => "Odie"},
@@ -198,8 +225,11 @@ defmodule GraphQL.Lang.Type.UnionInterfaceTest do
     """
 
     {:ok, result} = execute(schema, query, root_value: john, validate: false)
-    assert_data(result,
-      %{"__typename" => "Person",
+
+    assert_data(
+      result,
+      %{
+        "__typename" => "Person",
         "friends" => [
           %{"__typename" => "Person", "name" => "Liz"},
           %{"__typename" => "Dog", "barks" => true, "name" => "Odie"}
@@ -229,8 +259,11 @@ defmodule GraphQL.Lang.Type.UnionInterfaceTest do
     """
 
     {:ok, result} = execute(schema, query, root_value: john, validate: false)
-    assert_data(result,
-      %{"__typename" => "Person",
+
+    assert_data(
+      result,
+      %{
+        "__typename" => "Person",
         "friends" => [
           %{"__typename" => "Person", "name" => "Liz"},
           %{"__typename" => "Dog", "barks" => true, "name" => "Odie"}
@@ -242,40 +275,43 @@ defmodule GraphQL.Lang.Type.UnionInterfaceTest do
 
   test "allows fragment conditions to be abstract types" do
     query = """
-      {
-        __typename
-        name
-        pets { ...PetFields }
-        friends { ...FriendFields }
-      }
+    {
+      __typename
+      name
+      pets { ...PetFields }
+      friends { ...FriendFields }
+    }
 
-      fragment PetFields on Pet {
-        __typename
-        ... on Dog {
-          name
-          barks
-        }
-        ... on Cat {
-          name
-          meows
-        }
-      }
-
-      fragment FriendFields on Named {
-        __typename
+    fragment PetFields on Pet {
+      __typename
+      ... on Dog {
         name
-        ... on Dog {
-          barks
-        }
-        ... on Cat {
-          meows
-        }
+        barks
       }
-      """
+      ... on Cat {
+        name
+        meows
+      }
+    }
+
+    fragment FriendFields on Named {
+      __typename
+      name
+      ... on Dog {
+        barks
+      }
+      ... on Cat {
+        meows
+      }
+    }
+    """
 
     {:ok, result} = execute(schema, query, root_value: john, validate: false)
-    assert_data(result,
-      %{"__typename" => "Person",
+
+    assert_data(
+      result,
+      %{
+        "__typename" => "Person",
         "name" => "John",
         "friends" => [
           %{"__typename" => "Person", "name" => "Liz"},
@@ -290,7 +326,5 @@ defmodule GraphQL.Lang.Type.UnionInterfaceTest do
   end
 
   test "gets execution info in resolver" do
-
   end
-
 end

@@ -1,4 +1,3 @@
-
 defmodule GraphQL.Type.CompositeType do
   @moduledoc ~S"""
   Provides *get_field* and *get_fields* accessors for composite types.
@@ -26,6 +25,7 @@ defmodule GraphQL.Type.CompositeType do
       ArgumentError -> nil
     end
   end
+
   defp do_get_field(fields, field_name) when is_atom(field_name) do
     do_get_fields(fields)[field_name]
   end

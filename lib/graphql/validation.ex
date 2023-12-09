@@ -1,4 +1,3 @@
-
 defmodule GraphQL.Validation do
   @moduledoc ~S"""
   Helpers that are useful within validation rules.

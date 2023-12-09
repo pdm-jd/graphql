@@ -1,4 +1,3 @@
-
 defmodule GraphQL.Execution.Executor.ExecutorBlogSchemaTest do
   use ExUnit.Case, async: true
 
@@ -19,7 +18,7 @@ defmodule GraphQL.Execution.Executor.ExecutorBlogSchemaTest do
       author: %{
         id: "123",
         name: "John Smith",
-        pic: fn(w, h) -> %{url: "cdn://123", width: w, height: h} end,
+        pic: fn w, h -> %{url: "cdn://123", width: w, height: h} end,
         recentArticle: %{
           id: "1000",
           isPublished: true,
@@ -58,7 +57,7 @@ defmodule GraphQL.Execution.Executor.ExecutorBlogSchemaTest do
             height: %{type: %Int{}}
           },
           type: image,
-          resolve: fn(o, %{width: w, height: h}) -> o.pic.(w, h) end
+          resolve: fn o, %{width: w, height: h} -> o.pic.(w, h) end
         },
         recentArticle: nil
       }
@@ -77,8 +76,8 @@ defmodule GraphQL.Execution.Executor.ExecutorBlogSchemaTest do
     }
 
     # resolve circular dependency
-    author  = put_in author.fields.recentArticle, %{type: article}
-    article = put_in article.fields.author, %{type: author}
+    author = put_in(author.fields.recentArticle, %{type: article})
+    article = put_in(article.fields.author, %{type: author})
 
     blog_query = %ObjectType{
       name: "Query",
@@ -86,11 +85,11 @@ defmodule GraphQL.Execution.Executor.ExecutorBlogSchemaTest do
         article: %{
           type: article,
           args: %{id: %{type: %ID{}}},
-          resolve: fn(_, %{id: id}) -> make_article(id) end
+          resolve: fn _, %{id: id} -> make_article(id) end
         },
         feed: %{
           type: %List{ofType: article},
-          resolve: fn() -> for id <- 1..2, do: make_article(id) end
+          resolve: fn -> for id <- 1..2, do: make_article(id) end
         }
       }
     }
@@ -133,8 +132,8 @@ defmodule GraphQL.Execution.Executor.ExecutorBlogSchemaTest do
 
     assert_data(result, %{
       feed: [
-        %{id: "1",  title: "My Article 1"},
-        %{id: "2",  title: "My Article 2"}
+        %{id: "1", title: "My Article 1"},
+        %{id: "2", title: "My Article 2"}
       ],
       article: %{
         id: "1",

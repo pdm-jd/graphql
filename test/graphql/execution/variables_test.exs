@@ -20,10 +20,10 @@ defmodule GraphQL.Execution.Executor.VariableTest do
     %Input{
       name: "TestInputObject",
       fields: %{
-        a: %{ type: %String{} },
-        b: %{ type: %List{ofType: %String{} } },
-        c: %{ type: %NonNull{ofType: %String{} } },
-        d: %{ type: %TestComplexScalar{} }
+        a: %{type: %String{}},
+        b: %{type: %List{ofType: %String{}}},
+        c: %{type: %NonNull{ofType: %String{}}},
+        d: %{type: %TestComplexScalar{}}
       }
     }
   end
@@ -32,8 +32,8 @@ defmodule GraphQL.Execution.Executor.VariableTest do
     %Input{
       name: "TestNestedInputObject",
       fields: %{
-        na: %{ type: %NonNull{ofType: test_input_object } },
-        nb: %{ type: %NonNull{ofType: %String{} } }
+        na: %{type: %NonNull{ofType: test_input_object}},
+        nb: %{type: %NonNull{ofType: %String{}}}
       }
     }
   end
@@ -45,86 +45,86 @@ defmodule GraphQL.Execution.Executor.VariableTest do
         field_with_object_input: %{
           type: %String{},
           args: %{
-            input: %{ type: test_input_object }
+            input: %{type: test_input_object}
           },
           resolve: fn
-            (_, %{input: input}) -> input
-            (_, _) -> nil
+            _, %{input: input} -> input
+            _, _ -> nil
           end
         },
         field_with_nullable_string_input: %{
           type: %String{},
           args: %{
-            input: %{ type: %String{} }
+            input: %{type: %String{}}
           },
           resolve: fn
-            (_, %{input: input}) -> input && Poison.encode!(input)
-            (_, _) -> nil
+            _, %{input: input} -> input && Poison.encode!(input)
+            _, _ -> nil
           end
         },
         field_with_nonnullable_string_input: %{
           type: %String{},
           args: %{
-            input: %{ type: %NonNull{ofType: %String{} } }
+            input: %{type: %NonNull{ofType: %String{}}}
           },
           resolve: fn
-            (_, %{input: input}) -> input && Poison.encode!(input)
-            (_, _) -> nil
+            _, %{input: input} -> input && Poison.encode!(input)
+            _, _ -> nil
           end
         },
         field_with_default_parameter: %{
           type: %String{},
           args: %{
-            input: %{ type: %String{}, defaultValue: "Hello World" }
+            input: %{type: %String{}, defaultValue: "Hello World"}
           },
           resolve: fn
-            (_, %{input: input}) -> input && Poison.encode!(input)
-            (_, _) -> nil
+            _, %{input: input} -> input && Poison.encode!(input)
+            _, _ -> nil
           end
         },
         field_with_nested_input: %{
           type: %String{},
           args: %{
-            input: %{ type: test_nested_input_object, defaultValue: "Hello World" }
+            input: %{type: test_nested_input_object, defaultValue: "Hello World"}
           },
-          resolve: fn(_, %{input: input}) -> input && Poison.encode!(input) end
+          resolve: fn _, %{input: input} -> input && Poison.encode!(input) end
         },
         list: %{
           type: %String{},
           args: %{
-            input: %{ type: %List{ofType: %String{} } }
+            input: %{type: %List{ofType: %String{}}}
           },
           resolve: fn
-            (_, %{input: input}) -> input && Poison.encode!(input)
-            (_, _) -> nil
+            _, %{input: input} -> input && Poison.encode!(input)
+            _, _ -> nil
           end
         },
         nn_list: %{
           type: %String{},
           args: %{
-            input: %{ type: %NonNull{ofType: %List{ofType: %String{} } } }
+            input: %{type: %NonNull{ofType: %List{ofType: %String{}}}}
           },
           resolve: fn
-            (_, %{input: input}) -> input && Poison.encode!(input)
-            (_, _) -> nil
+            _, %{input: input} -> input && Poison.encode!(input)
+            _, _ -> nil
           end
         },
         list_nn: %{
           type: %String{},
           args: %{
-            input: %{ type: %List{ofType: %NonNull{ofType: %String{} } } }
+            input: %{type: %List{ofType: %NonNull{ofType: %String{}}}}
           },
           resolve: fn
-            (_, %{input: input}) -> input && Poison.encode!(input)
-            (_, _) -> nil
+            _, %{input: input} -> input && Poison.encode!(input)
+            _, _ -> nil
           end
         },
         nn_list_nn: %{
           type: %String{},
           args: %{
-            input: %{ type: %NonNull{ofType: %List{ofType: %NonNull{ofType: %String{} } } } }
+            input: %{type: %NonNull{ofType: %List{ofType: %NonNull{ofType: %String{}}}}}
           },
-          resolve: fn(_, %{input: input}) -> input && Poison.encode!(input) end
+          resolve: fn _, %{input: input} -> input && Poison.encode!(input) end
         }
       }
     }
@@ -145,7 +145,7 @@ defmodule GraphQL.Execution.Executor.VariableTest do
 
     # the inner value should be a string as part of String.coerce.
     # for now just get the right data..
-    assert_data(result, %{"field_with_object_input" => %{"a": "foo", "b": ["bar"], "c": "baz"}})
+    assert_data(result, %{"field_with_object_input" => %{a: "foo", b: ["bar"], c: "baz"}})
   end
 
   test "Handles objects and nullability using inline structs properly parses single value to list" do
@@ -157,7 +157,7 @@ defmodule GraphQL.Execution.Executor.VariableTest do
 
     {:ok, result} = execute(schema, query)
 
-    assert_data(result, %{"field_with_object_input" => %{"a": "foo", "b": ["bar"], "c": "baz"}})
+    assert_data(result, %{"field_with_object_input" => %{a: "foo", b: ["bar"], c: "baz"}})
   end
 
   test "Handles objects and nullability using inline structs does not use incorrect value" do
@@ -181,9 +181,12 @@ defmodule GraphQL.Execution.Executor.VariableTest do
   end
 
   test "Handles objects and nullability using variables executes with complex input" do
-    params = %{ "input" => %{ a: 'foo', b: [ 'bar' ], c: 'baz' } }
+    params = %{"input" => %{a: ~c"foo", b: [~c"bar"], c: ~c"baz"}}
     {:ok, result} = execute(schema, using_variables_query, variable_values: params)
-    assert_data(result, %{"field_with_object_input" => %{"a" => 'foo', "b" => ['bar'], "c" => 'baz'}})
+
+    assert_data(result, %{
+      "field_with_object_input" => %{"a" => ~c"foo", "b" => [~c"bar"], "c" => ~c"baz"}
+    })
   end
 
   test "Does not clobber variable_values when there's multiple document.definitions" do
@@ -197,10 +200,14 @@ defmodule GraphQL.Execution.Executor.VariableTest do
         field_with_object_input
       }
     """
-    params = %{ "input" => %{ a: 'foo', b: [ 'bar' ], c: 'baz' } }
+
+    params = %{"input" => %{a: ~c"foo", b: [~c"bar"], c: ~c"baz"}}
 
     {:ok, result} = execute(schema, query, variable_values: params)
-    assert_data(result, %{"field_with_object_input" => %{"a" => 'foo', "b" => ['bar'], "c" => 'baz'}})
+
+    assert_data(result, %{
+      "field_with_object_input" => %{"a" => ~c"foo", "b" => [~c"bar"], "c" => ~c"baz"}
+    })
   end
 
   test "Handles objects and nullability using variables uses default value when not provided" do
@@ -211,7 +218,10 @@ defmodule GraphQL.Execution.Executor.VariableTest do
     """
 
     {:ok, result} = execute(schema, query)
-    assert_data(result, %{"field_with_object_input" => %{"a" => "foo", "b" => ["bar"], "c" => "baz"}})
+
+    assert_data(result, %{
+      "field_with_object_input" => %{"a" => "foo", "b" => ["bar"], "c" => "baz"}
+    })
   end
 
   # TODO looks the same as test above?
@@ -223,20 +233,27 @@ defmodule GraphQL.Execution.Executor.VariableTest do
     """
 
     {:ok, result} = execute(schema, query)
-    assert_data(result, %{"field_with_object_input" => %{"a" => "foo", "b" => ["bar"], "c" => "baz"}})
+
+    assert_data(result, %{
+      "field_with_object_input" => %{"a" => "foo", "b" => ["bar"], "c" => "baz"}
+    })
   end
 
-  @tag :skip # finish ComplexType
+  # finish ComplexType
+  @tag :skip
   test "Handles objects and nullability using variables executes with complex scalar input" do
-    params = %{ "input" => %{ c: 'foo', d: 'SerializedValue' } };
+    params = %{"input" => %{c: ~c"foo", d: ~c"SerializedValue"}}
 
     {:ok, result} = execute(schema, using_variables_query, variable_values: params)
-    assert_data(result, %{"field_with_object_input" => %{"c" => 'foo', "d" => 'DeserializedValue'}})
+
+    assert_data(result, %{
+      "field_with_object_input" => %{"c" => ~c"foo", "d" => ~c"DeserializedValue"}
+    })
   end
 
   @tag :skip
   test "Handles objects and nullability using variables errors on null for nested non-null" do
-    params = %{ "input" => %{ a: 'foo', b: 'bar', c: nil } }
+    params = %{"input" => %{a: ~c"foo", b: ~c"bar", c: nil}}
 
     {:ok, result} = execute(schema, using_variables_query, variable_values: params)
     assert_has_error(result, %{message: "replace with correct error message"})
@@ -244,7 +261,7 @@ defmodule GraphQL.Execution.Executor.VariableTest do
 
   @tag :skip
   test "Handles objects and nullability using variables errors on incorrect type" do
-    params = %{ "input" => "foo bar" }
+    params = %{"input" => "foo bar"}
 
     {:ok, result} = execute(schema, using_variables_query, variable_values: params)
     assert_has_error(result, %{message: "replace with correct error message"})
@@ -252,7 +269,7 @@ defmodule GraphQL.Execution.Executor.VariableTest do
 
   @tag :skip
   test "Handles objects and nullability using variables errors on omission of nested non-null" do
-    params = %{ "input" => %{ a: 'foo', b: 'bar' } }
+    params = %{"input" => %{a: ~c"foo", b: ~c"bar"}}
 
     {:ok, result} = execute(schema, using_variables_query, variable_values: params)
     assert_has_error(result, %{message: "replace with correct error message"})
@@ -260,7 +277,8 @@ defmodule GraphQL.Execution.Executor.VariableTest do
 
   @tag :skip
   test "Handles objects and nullability using variables errors on deep nested errors and with many errors" do
-    params = %{ "input" => %{ na: %{ a: 'foo' } } }
+    params = %{"input" => %{na: %{a: ~c"foo"}}}
+
     query = """
       query q($input: TestNestedInputObject) {
         fieldWithNestedObjectInput(input: $input)
@@ -350,6 +368,7 @@ defmodule GraphQL.Execution.Executor.VariableTest do
         field_with_nonnullable_string_input(input: $value)
       }
     """
+
     {:ok, result} = execute(schema, query, variable_values: %{"value" => nil})
     assert_has_error(result, %{message: "replace with actual error message"})
   end
@@ -387,7 +406,7 @@ defmodule GraphQL.Execution.Executor.VariableTest do
       }
     """
 
-    {:ok, result} = execute(schema, query, variable_values: %{ "input" => nil })
+    {:ok, result} = execute(schema, query, variable_values: %{"input" => nil})
     assert_data(result, %{"list" => nil})
   end
 
@@ -398,7 +417,7 @@ defmodule GraphQL.Execution.Executor.VariableTest do
       }
     """
 
-    {:ok, result} = execute(schema, query, variable_values: %{ "input" => ["A"] })
+    {:ok, result} = execute(schema, query, variable_values: %{"input" => ["A"]})
     assert_data(result, %{"list" => ~s(["A"])})
   end
 
@@ -409,7 +428,7 @@ defmodule GraphQL.Execution.Executor.VariableTest do
       }
     """
 
-    {:ok, result} = execute(schema, query, variable_values: %{ "input" => ["A", nil, "B"] })
+    {:ok, result} = execute(schema, query, variable_values: %{"input" => ["A", nil, "B"]})
     assert_data(result, %{"list" => ~s(["A",null,"B"])})
   end
 
@@ -432,7 +451,7 @@ defmodule GraphQL.Execution.Executor.VariableTest do
       }
     """
 
-    {:ok, result} = execute(schema, query, variable_values: %{ "input" => ["A"] })
+    {:ok, result} = execute(schema, query, variable_values: %{"input" => ["A"]})
     assert_data(result, %{"nn_list" => ~s(["A"])})
   end
 
@@ -443,7 +462,7 @@ defmodule GraphQL.Execution.Executor.VariableTest do
       }
     """
 
-    {:ok, result} = execute(schema, query, variable_values: %{ "input" => ["A", nil, "B"] })
+    {:ok, result} = execute(schema, query, variable_values: %{"input" => ["A", nil, "B"]})
     assert_data(result, %{"nn_list" => ~s(["A",null,"B"])})
   end
 
@@ -454,7 +473,7 @@ defmodule GraphQL.Execution.Executor.VariableTest do
       }
     """
 
-    {:ok, result} = execute(schema, query, variable_values: %{ "input" => nil })
+    {:ok, result} = execute(schema, query, variable_values: %{"input" => nil})
     assert_data(result, %{"list_nn" => nil})
   end
 
@@ -465,7 +484,7 @@ defmodule GraphQL.Execution.Executor.VariableTest do
       }
     """
 
-    {:ok, result} = execute(schema, query, variable_values: %{ "input" => ["A"] })
+    {:ok, result} = execute(schema, query, variable_values: %{"input" => ["A"]})
     assert_data(result, %{"list_nn" => ~s(["A"])})
   end
 
@@ -477,7 +496,7 @@ defmodule GraphQL.Execution.Executor.VariableTest do
       }
     """
 
-    {:ok, result} = execute(schema, query, variable_values: %{ "input" => ["A", nil, "B"] })
+    {:ok, result} = execute(schema, query, variable_values: %{"input" => ["A", nil, "B"]})
     assert_has_error(result, %{message: "replace with actual error message"})
   end
 
@@ -489,7 +508,7 @@ defmodule GraphQL.Execution.Executor.VariableTest do
       }
     """
 
-    {:ok, result} = execute(schema, query, variable_values: %{ "input" => nil })
+    {:ok, result} = execute(schema, query, variable_values: %{"input" => nil})
     assert_has_error(result, %{message: "replace with actual error message"})
   end
 
@@ -500,7 +519,7 @@ defmodule GraphQL.Execution.Executor.VariableTest do
       }
     """
 
-    {:ok, result} = execute(schema, query, variable_values: %{ "input" => ["A"] })
+    {:ok, result} = execute(schema, query, variable_values: %{"input" => ["A"]})
     assert_data(result, %{"nn_list_nn" => ~s(["A"])})
   end
 
@@ -512,11 +531,12 @@ defmodule GraphQL.Execution.Executor.VariableTest do
       }
     """
 
-    {:ok, result} = execute(schema, query, variable_values: %{ "input" => ["A", nil, "B"] })
+    {:ok, result} = execute(schema, query, variable_values: %{"input" => ["A", nil, "B"]})
     assert_has_error(result, %{message: "replace with actual error message"})
   end
 
-  @tag :skip # input cannot be TestType is an Object, which can't be input?
+  # input cannot be TestType is an Object, which can't be input?
+  @tag :skip
   test "Handles lists and nullability does not allow invalid types to be used as values" do
     query = """
       query q($input: TestType!) {
@@ -524,7 +544,7 @@ defmodule GraphQL.Execution.Executor.VariableTest do
       }
     """
 
-    {:ok, result} = execute(schema, query, variable_values: %{ "input" => %{ "list" => ["A", "B"] }})
+    {:ok, result} = execute(schema, query, variable_values: %{"input" => %{"list" => ["A", "B"]}})
     assert_has_error(result, %{message: "replace with actual error message"})
   end
 
@@ -536,7 +556,7 @@ defmodule GraphQL.Execution.Executor.VariableTest do
       }
     """
 
-    {:ok, result} = execute(schema, query, variable_values: %{ "input" => "whoknows"})
+    {:ok, result} = execute(schema, query, variable_values: %{"input" => "whoknows"})
     assert_has_error(result, %{message: "replace with actual error message"})
   end
 
@@ -563,20 +583,21 @@ defmodule GraphQL.Execution.Executor.VariableTest do
   end
 
   test "default arguments" do
-    schema = Schema.new(%{
-      query: %ObjectType{
-        name: "DefaultArguments",
-        fields: %{
-          greeting: %{
-            type: %String{},
-            args: %{
-              name: %{type: %String{}}
-            },
-            resolve: fn(_, %{name: name}) -> "Hello #{name}" end
+    schema =
+      Schema.new(%{
+        query: %ObjectType{
+          name: "DefaultArguments",
+          fields: %{
+            greeting: %{
+              type: %String{},
+              args: %{
+                name: %{type: %String{}}
+              },
+              resolve: fn _, %{name: name} -> "Hello #{name}" end
+            }
           }
         }
-      }
-    })
+      })
 
     {:ok, result} = execute(schema, ~S[query g($name: String = "Joe") { greeting(name: $name) }])
     assert_data(result, %{greeting: "Hello Joe"})

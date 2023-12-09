@@ -6,4 +6,3 @@ defimpl GraphQL.Execution.Completion, for: Atom do
     Completion.complete_value(Types.unwrap_type(return_type), context, field_asts, info, result)
   end
 end
-

@@ -3,4 +3,3 @@ defmodule GraphQL.Util.Text do
     text |> String.replace(~r/\n/, " ", global: true) |> String.strip()
   end
 end
-

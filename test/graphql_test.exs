@@ -9,13 +9,12 @@ defmodule GraphQLTest do
 
   def schema do
     GraphQL.Schema.new(%{
-        query: %ObjectType{
-          fields: %{
-            a: %{type: %String{}}
-          }
+      query: %ObjectType{
+        fields: %{
+          a: %{type: %String{}}
         }
       }
-    )
+    })
   end
 
   test "Execute simple query" do
@@ -25,9 +24,17 @@ defmodule GraphQLTest do
 
   test "Report parse error with message" do
     {_, result} = execute(schema, "{")
-    assert_has_error(result, %{message: "GraphQL: syntax error before:  on line 1", line_number: 1})
+
+    assert_has_error(result, %{
+      message: "GraphQL: syntax error before:  on line 1",
+      line_number: 1
+    })
 
     {_, result} = execute(schema, "a")
-    assert_has_error(result, %{message: "GraphQL: syntax error before: \"a\" on line 1", line_number: 1})
+
+    assert_has_error(result, %{
+      message: "GraphQL: syntax error before: \"a\" on line 1",
+      line_number: 1
+    })
   end
 end

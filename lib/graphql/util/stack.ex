@@ -4,7 +4,7 @@ defmodule GraphQL.Util.Stack do
   *peek* returns the top element.
   """
 
-  alias GraphQL.Util.Stack 
+  alias GraphQL.Util.Stack
 
   defstruct elements: []
 
@@ -14,17 +14,17 @@ defmodule GraphQL.Util.Stack do
 
   def pop(stack) do
     case stack.elements do
-      [_|rest] -> %Stack{stack | elements: rest}
+      [_ | rest] -> %Stack{stack | elements: rest}
       [] -> nil
     end
   end
 
   def peek(stack) do
     case stack.elements do
-      [node|_] -> node
+      [node | _] -> node
       [] -> nil
     end
   end
-  
+
   def length(stack), do: Kernel.length(stack.elements)
 end

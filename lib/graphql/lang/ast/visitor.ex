@@ -1,4 +1,3 @@
-
 defmodule GraphQL.Lang.AST do
   defprotocol Visitor do
     @moduledoc """

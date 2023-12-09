@@ -1,6 +1,4 @@
-
 defmodule GraphQL.Execution.FieldResolver do
-
   alias GraphQL.Execution.Arguments
   alias GraphQL.Execution.Resolvable
   alias GraphQL.Execution.ExecutionContext
@@ -15,11 +13,12 @@ defmodule GraphQL.Execution.FieldResolver do
     if field_def = field_definition(parent_type, field_name) do
       return_type = field_def.type
 
-      args = Arguments.argument_values(
-        Map.get(field_def, :args, %{}),
-        Map.get(field_ast, :arguments, %{}),
-        context.variable_values
-      )
+      args =
+        Arguments.argument_values(
+          Map.get(field_def, :args, %{}),
+          Map.get(field_ast, :arguments, %{}),
+          context.variable_values
+        )
 
       info = %{
         field_name: field_name,
@@ -36,8 +35,10 @@ defmodule GraphQL.Execution.FieldResolver do
       case resolve(field_def, source, args, info) do
         {:ok, nil} ->
           {context, nil}
+
         {:ok, result} ->
           Completion.complete_value(return_type, context, field_asts, info, result)
+
         {:error, message} ->
           {ExecutionContext.report_error(context, message), nil}
       end
@@ -64,5 +65,3 @@ defmodule GraphQL.Execution.FieldResolver do
     end
   end
 end
-
-

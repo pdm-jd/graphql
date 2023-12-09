@@ -1,5 +1,5 @@
-Code.require_file "../support/star_wars/data.exs", __DIR__
-Code.require_file "../support/star_wars/schema.exs", __DIR__
+Code.require_file("../support/star_wars/data.exs", __DIR__)
+Code.require_file("../support/star_wars/schema.exs", __DIR__)
 
 defmodule GraphQL.StarWars.QueryTest do
   use ExUnit.Case, async: true
@@ -8,7 +8,8 @@ defmodule GraphQL.StarWars.QueryTest do
   test "correctly identifies R2-D2 as the hero of the Star Wars Saga" do
     query = ~S[ query hero_name_query { hero { name } }]
 
-    {:ok, result} = execute(StarWars.Schema.schema, query)
+    {:ok, result} = execute(StarWars.Schema.schema(), query)
+
     assert_data(result, %{
       hero: %{name: "R2-D2"}
     })
@@ -21,7 +22,8 @@ defmodule GraphQL.StarWars.QueryTest do
       }
     ]
 
-    {:ok, result} = execute(StarWars.Schema.schema, query)
+    {:ok, result} = execute(StarWars.Schema.schema(), query)
+
     assert_data(result, %{
       hero: %{
         friends: [
@@ -51,28 +53,48 @@ defmodule GraphQL.StarWars.QueryTest do
       }
     ]
 
-    {:ok, result} = execute(StarWars.Schema.schema, query)
+    {:ok, result} = execute(StarWars.Schema.schema(), query)
+
     assert_data(result, %{
       hero: %{
         name: "R2-D2",
         friends: [
-        %{appears_in: ["NEWHOPE", "EMPIRE", "JEDI"],
-          friends: [%{name: "Han Solo"}, %{name: "Leia Organa"}, %{name: "C-3PO"}, %{name: "R2-D2"}],
-          name: "Luke Skywalker"},
-        %{appears_in: ["NEWHOPE", "EMPIRE", "JEDI"],
-          friends: [%{name: "Luke Skywalker"}, %{name: "Leia Organa"}, %{name: "R2-D2"}],
-          name: "Han Solo"},
-        %{appears_in: ["NEWHOPE", "EMPIRE", "JEDI"],
-          friends: [%{name: "Luke Skywalker"}, %{name: "Han Solo"}, %{name: "C-3PO"}, %{name: "R2-D2"}],
-          name: "Leia Organa"}]
+          %{
+            appears_in: ["NEWHOPE", "EMPIRE", "JEDI"],
+            friends: [
+              %{name: "Han Solo"},
+              %{name: "Leia Organa"},
+              %{name: "C-3PO"},
+              %{name: "R2-D2"}
+            ],
+            name: "Luke Skywalker"
+          },
+          %{
+            appears_in: ["NEWHOPE", "EMPIRE", "JEDI"],
+            friends: [%{name: "Luke Skywalker"}, %{name: "Leia Organa"}, %{name: "R2-D2"}],
+            name: "Han Solo"
+          },
+          %{
+            appears_in: ["NEWHOPE", "EMPIRE", "JEDI"],
+            friends: [
+              %{name: "Luke Skywalker"},
+              %{name: "Han Solo"},
+              %{name: "C-3PO"},
+              %{name: "R2-D2"}
+            ],
+            name: "Leia Organa"
+          }
+        ]
       }
     })
   end
 
   test "Allows us to query for Luke Skywalker directly, using his ID" do
-    query = ~S[query find_luke { human(id: "1000") { name } } ] # would have been useful for Episode VII
+    # would have been useful for Episode VII
+    query = ~S[query find_luke { human(id: "1000") { name } } ]
 
-    {:ok, result} = execute(StarWars.Schema.schema, query)
+    {:ok, result} = execute(StarWars.Schema.schema(), query)
+
     assert_data(result, %{
       human: %{name: "Luke Skywalker"}
     })
@@ -81,7 +103,9 @@ defmodule GraphQL.StarWars.QueryTest do
   test "Allows us to create a generic query, then use it to fetch Luke Skywalker using his ID" do
     query = ~S[query fetch_id($some_id: String!) { human(id: $some_id) { name }}]
 
-    {:ok, result} = execute(StarWars.Schema.schema, query, variable_values: %{"some_id" => "1000"})
+    {:ok, result} =
+      execute(StarWars.Schema.schema(), query, variable_values: %{"some_id" => "1000"})
+
     assert_data(result, %{
       human: %{name: "Luke Skywalker"}
     })
@@ -90,17 +114,21 @@ defmodule GraphQL.StarWars.QueryTest do
   test "Allows us to create a generic query, then use it to fetch Han Solo using his ID" do
     query = ~S[query fetch_some_id($some_id: String!) { human(id: $some_id) { name }}]
 
-    {:ok, result} = execute(StarWars.Schema.schema, query, variable_values: %{"some_id" => "1002"})
+    {:ok, result} =
+      execute(StarWars.Schema.schema(), query, variable_values: %{"some_id" => "1002"})
+
     assert_data(result, %{
       human: %{name: "Han Solo"}
     })
   end
 
-  @tag :skip # returns %{} instead of nil. Which is right?
+  # returns %{} instead of nil. Which is right?
+  @tag :skip
   test "Allows us to create a generic query, then pass an invalid ID to get null back" do
     query = ~S[query human_query($id: String!) { human(id: $id) { name }}]
 
-    {:ok, result} = execute(StarWars.Schema.schema, query, variable_values: %{id: "invalid id"})
+    {:ok, result} = execute(StarWars.Schema.schema(), query, variable_values: %{id: "invalid id"})
+
     assert_data(result, %{
       human: nil
     })
@@ -109,7 +137,8 @@ defmodule GraphQL.StarWars.QueryTest do
   test "Allows us to query for Luke, changing his key with an alias" do
     query = ~S[query fetch_luke_aliased { luke: human(id: "1000") { name }}]
 
-    {:ok, result} = execute(StarWars.Schema.schema, query, variable_values: %{id: "invalid id"})
+    {:ok, result} = execute(StarWars.Schema.schema(), query, variable_values: %{id: "invalid id"})
+
     assert_data(result, %{
       luke: %{name: "Luke Skywalker"}
     })
@@ -121,7 +150,8 @@ defmodule GraphQL.StarWars.QueryTest do
       leia: human(id: "1003") { name }
     }]
 
-    {:ok, result} = execute(StarWars.Schema.schema, query)
+    {:ok, result} = execute(StarWars.Schema.schema(), query)
+
     assert_data(result, %{
       leia: %{name: "Leia Organa"},
       luke: %{name: "Luke Skywalker"}
@@ -136,7 +166,8 @@ defmodule GraphQL.StarWars.QueryTest do
       }
     ]
 
-    {:ok, result} = execute(StarWars.Schema.schema, query)
+    {:ok, result} = execute(StarWars.Schema.schema(), query)
+
     assert_data(result, %{
       leia: %{home_planet: "Alderaan", name: "Leia Organa"},
       luke: %{home_planet: "Tatooine", name: "Luke Skywalker"}
@@ -154,7 +185,8 @@ defmodule GraphQL.StarWars.QueryTest do
       }
     ]
 
-    {:ok, result} = execute(StarWars.Schema.schema, query)
+    {:ok, result} = execute(StarWars.Schema.schema(), query)
+
     assert_data(result, %{
       leia: %{home_planet: "Alderaan", name: "Leia Organa"},
       luke: %{home_planet: "Tatooine", name: "Luke Skywalker"}
@@ -171,9 +203,10 @@ defmodule GraphQL.StarWars.QueryTest do
       }
     ]
 
-    {:ok, result} = execute(StarWars.Schema.schema, query)
+    {:ok, result} = execute(StarWars.Schema.schema(), query)
+
     assert_data(result, %{
-      hero: %{name: "R2-D2", "__typename": "Droid"}
+      hero: %{name: "R2-D2", __typename: "Droid"}
     })
   end
 
@@ -187,9 +220,10 @@ defmodule GraphQL.StarWars.QueryTest do
       }
     ]
 
-    {:ok, result} = execute(StarWars.Schema.schema, query)
+    {:ok, result} = execute(StarWars.Schema.schema(), query)
+
     assert_data(result, %{
-      hero: %{name: "Luke Skywalker", "__typename": "Human"}
+      hero: %{name: "Luke Skywalker", __typename: "Human"}
     })
   end
 end

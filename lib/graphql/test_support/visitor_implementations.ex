@@ -1,9 +1,6 @@
-
 defmodule GraphQL.TestSupport.VisitorImplementations do
-
   alias GraphQL.Lang.AST.Visitor
   alias GraphQL.Lang.AST.PostprocessingVisitor
-
 
   defmodule TracingVisitor do
     defstruct name: nil
@@ -11,7 +8,8 @@ defmodule GraphQL.TestSupport.VisitorImplementations do
 
   defimpl Visitor, for: TracingVisitor do
     def enter(visitor, node, accumulator) do
-      {:continue, %{accumulator | calls: ["#{visitor.name} entering #{node[:kind]}"] ++ accumulator[:calls]}}
+      {:continue,
+       %{accumulator | calls: ["#{visitor.name} entering #{node[:kind]}"] ++ accumulator[:calls]}}
     end
 
     def leave(visitor, node, accumulator) do
@@ -47,4 +45,3 @@ defmodule GraphQL.TestSupport.VisitorImplementations do
     def finish(_visitor, accumulator), do: accumulator[:count]
   end
 end
-

@@ -7,11 +7,13 @@ defmodule ExUnit.TestHelpers do
   alias GraphQL.Lang.Parser
 
   def stringify_keys(map) when is_map(map) do
-    Enum.reduce(map, %{}, fn({k, v}, acc) -> Map.put(acc, stringify_key(k), stringify_keys(v)) end)
+    Enum.reduce(map, %{}, fn {k, v}, acc -> Map.put(acc, stringify_key(k), stringify_keys(v)) end)
   end
+
   def stringify_keys(list) when is_list(list) do
     Enum.map(list, &stringify_keys/1)
   end
+
   def stringify_keys(x), do: x
 
   def stringify_key(key) when is_atom(key), do: to_string(key)
@@ -28,7 +30,7 @@ defmodule ExUnit.TestHelpers do
   def assert_has_error(result, expected) do
     assert(
       Enum.member?(result[:errors], stringify_keys(expected)),
-      message: "Expected result[:errors] to contain #{inspect expected}"
+      message: "Expected result[:errors] to contain #{inspect(expected)}"
     )
   end
 

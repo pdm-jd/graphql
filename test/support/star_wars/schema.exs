@@ -1,5 +1,4 @@
 defmodule StarWars.Schema do
-
   alias GraphQL.Type.ObjectType
   alias GraphQL.Type.List
   alias GraphQL.Type.Interface
@@ -17,7 +16,7 @@ defmodule StarWars.Schema do
   #
   defmodule Episode do
     def type do
-      GraphQL.Type.Enum.new %{
+      GraphQL.Type.Enum.new(%{
         name: "Episode",
         description: "One of the films in the Star Wars Trilogy",
         values: %{
@@ -25,13 +24,13 @@ defmodule StarWars.Schema do
           EMPIRE: %{value: 5, description: "Released in 1980"},
           JEDI: %{value: 6, description: "Released in 1983"}
         }
-      }
+      })
     end
   end
 
   defmodule Character do
     def type do
-      Interface.new %{
+      Interface.new(%{
         name: "Character",
         description: "A character in the Star Wars Trilogy",
         fields: %{
@@ -40,10 +39,10 @@ defmodule StarWars.Schema do
           friends: %{type: %List{ofType: Character}},
           appears_in: %{type: %List{ofType: Episode}}
         },
-        resolver: fn(x) ->
+        resolver: fn x ->
           if StarWars.Data.get_human(x.id), do: Human, else: Droid
         end
-      }
+      })
     end
   end
 
@@ -57,7 +56,7 @@ defmodule StarWars.Schema do
           name: %{type: %String{}},
           friends: %{
             type: %List{ofType: Character},
-            resolve: fn(item) -> StarWars.Data.get_friends(item) end
+            resolve: fn item -> StarWars.Data.get_friends(item) end
           },
           appears_in: %{type: %List{ofType: Episode}},
           home_planet: %{type: %String{}}
@@ -77,7 +76,7 @@ defmodule StarWars.Schema do
           name: %{type: %String{}},
           friends: %{
             type: %List{ofType: Character},
-            resolve: fn(item) -> StarWars.Data.get_friends(item) end
+            resolve: fn item -> StarWars.Data.get_friends(item) end
           },
           appears_in: %{type: %List{ofType: Episode}},
           primary_function: %{type: %String{}}
@@ -97,10 +96,11 @@ defmodule StarWars.Schema do
             # TODO this should be a type InputObject
             episode: %{
               type: Episode,
-              description: "If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode"
+              description:
+                "If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode"
             }
           },
-          resolve: fn(_, args) ->
+          resolve: fn _, args ->
             StarWars.Data.get_hero(Map.get(args, :episode))
           end
         },
@@ -109,14 +109,14 @@ defmodule StarWars.Schema do
           args: %{
             id: %{type: %NonNull{ofType: %String{}}, description: "id of the human"}
           },
-          resolve: fn(_, args) -> StarWars.Data.get_human(args.id) end
+          resolve: fn _, args -> StarWars.Data.get_human(args.id) end
         },
         droid: %{
           type: Droid,
           args: %{
             id: %{type: %NonNull{ofType: %String{}}, description: "id of the droid"}
           },
-          resolve: fn(_, args) -> StarWars.Data.get_droid(args.id) end
+          resolve: fn _, args -> StarWars.Data.get_droid(args.id) end
         }
       }
     }

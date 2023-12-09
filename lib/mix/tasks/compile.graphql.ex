@@ -30,7 +30,7 @@ defmodule Mix.Tasks.Compile.Graphql do
 
   """
 
-  @spec run(OptionParser.argv) :: :ok | :noop
+  @spec run(OptionParser.argv()) :: :ok | :noop
   def run(args) do
     {opts, _, _} = OptionParser.parse(args, switches: [force: :boolean])
 
@@ -38,7 +38,7 @@ defmodule Mix.Tasks.Compile.Graphql do
 
     changed =
       graphql_schema_glob
-      |> Path.wildcard
+      |> Path.wildcard()
       |> compile_all(opts)
 
     if Enum.any?(changed, &(&1 == :ok)) do
@@ -52,23 +52,26 @@ defmodule Mix.Tasks.Compile.Graphql do
   Returns GraphQL manifests.
   """
   def manifests, do: [manifest]
-  defp manifest, do: Path.join(Mix.Project.manifest_path, @manifest)
+  defp manifest, do: Path.join(Mix.Project.manifest_path(), @manifest)
 
   def compile_all(schema_paths, opts) do
-    Enum.map schema_paths, &(compile(&1, opts))
+    Enum.map(schema_paths, &compile(&1, opts))
   end
 
   def compile(schema_path, opts) do
     base_filename = extract_file_prefix(schema_path)
     target = base_filename <> ".ex"
+
     if opts[:force] || Mix.Utils.stale?([schema_path], [target]) do
-      Mix.shell.info "Compiling `#{schema_path}` to `#{target}`"
+      Mix.shell().info("Compiling `#{schema_path}` to `#{target}`")
+
       with target,
-           {:ok, source_schema}    <- File.read(schema_path),
-           {:ok, generated_schema} <- GraphQL.Schema.Generator.generate(base_filename, source_schema),
-        do: File.write!(target, generated_schema)
+           {:ok, source_schema} <- File.read(schema_path),
+           {:ok, generated_schema} <-
+             GraphQL.Schema.Generator.generate(base_filename, source_schema),
+           do: File.write!(target, generated_schema)
     else
-      Mix.shell.info "Skipping `#{schema_path}`"
+      Mix.shell().info("Skipping `#{schema_path}`")
     end
   end
 

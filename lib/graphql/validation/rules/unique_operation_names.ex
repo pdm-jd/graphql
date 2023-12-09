@@ -1,6 +1,4 @@
-
 defmodule GraphQL.Validation.Rules.UniqueOperationNames do
-
   alias GraphQL.Lang.AST.{Visitor, InitialisingVisitor}
   import GraphQL.Validation
 
@@ -14,11 +12,13 @@ defmodule GraphQL.Validation.Rules.UniqueOperationNames do
 
   defimpl Visitor do
     def enter(_visitor, %{kind: :OperationDefinition, name: %{value: _} = op_name}, accumulator) do
-      accumulator = if seen_operation?(accumulator, op_name) do
-        report_error(accumulator, duplicate_operation_message(op_name))
-      else
-        mark_as_seen(accumulator, op_name)
-      end
+      accumulator =
+        if seen_operation?(accumulator, op_name) do
+          report_error(accumulator, duplicate_operation_message(op_name))
+        else
+          mark_as_seen(accumulator, op_name)
+        end
+
       {:continue, accumulator}
     end
 

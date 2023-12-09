@@ -1,4 +1,3 @@
-
 alias GraphQL.Lang.AST.Visitor
 alias GraphQL.Lang.AST.InitialisingVisitor
 alias GraphQL.Lang.AST.PostprocessingVisitor
@@ -33,11 +32,10 @@ defmodule GraphQL.Lang.AST.CompositeVisitor do
   upon 'enter' and last upon 'leave'.
   """
   def compose([visitor]), do: visitor
-  def compose([outer_visitor|rest]), do: compose(outer_visitor, compose(rest))
+  def compose([outer_visitor | rest]), do: compose(outer_visitor, compose(rest))
 end
 
 defimpl Visitor, for: GraphQL.Lang.AST.CompositeVisitor do
-
   @doc """
   Invoke *enter* on the outer visitor first, passing the resulting accumulator to the *enter*
   call on the *inner* visitor.
@@ -46,8 +44,9 @@ defimpl Visitor, for: GraphQL.Lang.AST.CompositeVisitor do
   then execution will cease.
   """
   def enter(composite_visitor, node, accumulator) do
-    {v1_next_action, v1_accumulator}
-      = Visitor.enter(composite_visitor.outer_visitor, node, accumulator)
+    {v1_next_action, v1_accumulator} =
+      Visitor.enter(composite_visitor.outer_visitor, node, accumulator)
+
     accumulator = Map.merge(accumulator, v1_accumulator)
 
     if v1_next_action == :skip do
@@ -66,7 +65,10 @@ defimpl Visitor, for: GraphQL.Lang.AST.CompositeVisitor do
   """
   def leave(composite_visitor, node, accumulator) do
     v1_accumulator = Visitor.leave(composite_visitor.inner_visitor, node, accumulator)
-    v2_accumulator = Visitor.leave(composite_visitor.outer_visitor, node, Map.merge(accumulator, v1_accumulator))
+
+    v2_accumulator =
+      Visitor.leave(composite_visitor.outer_visitor, node, Map.merge(accumulator, v1_accumulator))
+
     v2_accumulator
   end
 end
@@ -96,4 +98,3 @@ defimpl PostprocessingVisitor, for: GraphQL.Lang.AST.CompositeVisitor do
     PostprocessingVisitor.finish(composite_visitor.outer_visitor, accumulator)
   end
 end
-

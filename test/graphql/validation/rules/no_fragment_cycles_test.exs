@@ -1,5 +1,4 @@
-
-Code.require_file "../../../support/validations.exs", __DIR__
+Code.require_file("../../../support/validations.exs", __DIR__)
 
 defmodule GraphQL.Validation.Rules.NoFragmentCyclesTest do
   use ExUnit.Case, async: true
@@ -10,7 +9,7 @@ defmodule GraphQL.Validation.Rules.NoFragmentCyclesTest do
 
   test "single reference is valid" do
     assert_passes_rule(
-      """ 
+      """
       fragment fragA on Dog { ...fragB }
       fragment fragB on Dog { name }
       """,
@@ -20,7 +19,7 @@ defmodule GraphQL.Validation.Rules.NoFragmentCyclesTest do
 
   test "spreading twice is not circular" do
     assert_passes_rule(
-      """ 
+      """
       fragment fragA on Dog { ...fragB, ...fragB }
       fragment fragB on Dog { name }
       """,
@@ -30,7 +29,7 @@ defmodule GraphQL.Validation.Rules.NoFragmentCyclesTest do
 
   test "spreading twice indirectly is not circular" do
     assert_passes_rule(
-      """ 
+      """
       fragment fragA on Dog { ...fragB, ...fragC }
       fragment fragB on Dog { ...fragC }
       fragment fragC on Dog { name }
@@ -41,7 +40,7 @@ defmodule GraphQL.Validation.Rules.NoFragmentCyclesTest do
 
   test "double spread within abstract types" do
     assert_passes_rule(
-      """ 
+      """
       fragment nameFragment on Pet {
         ... on Dog { name }
         ... on Cat { name }
@@ -58,7 +57,7 @@ defmodule GraphQL.Validation.Rules.NoFragmentCyclesTest do
 
   test "does not false positive on unknown fragment" do
     assert_passes_rule(
-      """ 
+      """
       fragment nameFragment on Pet {
         ...UnknownFragment
       }
@@ -69,7 +68,7 @@ defmodule GraphQL.Validation.Rules.NoFragmentCyclesTest do
 
   test "spreading recursively within field fails" do
     assert_fails_rule(
-      """ 
+      """
       fragment fragA on Human { relatives { ...fragA } }
       """,
       %Rule{},
@@ -79,7 +78,7 @@ defmodule GraphQL.Validation.Rules.NoFragmentCyclesTest do
 
   test "no spreading itself directly" do
     assert_fails_rule(
-      """ 
+      """
       fragment fragA on Dog { ...fragA }
       """,
       %Rule{},
@@ -89,7 +88,7 @@ defmodule GraphQL.Validation.Rules.NoFragmentCyclesTest do
 
   test "no spreading itself directly within inline fragment" do
     assert_fails_rule(
-      """ 
+      """
       fragment fragA on Pet {
         ... on Dog {
           ...fragA
@@ -103,7 +102,7 @@ defmodule GraphQL.Validation.Rules.NoFragmentCyclesTest do
 
   test "no spreading itself indirectly" do
     assert_fails_rule(
-      """ 
+      """
       fragment fragA on Dog { ...fragB }
       fragment fragB on Dog { ...fragA }
       """,
@@ -114,7 +113,7 @@ defmodule GraphQL.Validation.Rules.NoFragmentCyclesTest do
 
   test "no spreading itself indirectly reports opposite order" do
     assert_fails_rule(
-      """ 
+      """
       fragment fragB on Dog { ...fragA }
       fragment fragA on Dog { ...fragB }
       """,
@@ -125,7 +124,7 @@ defmodule GraphQL.Validation.Rules.NoFragmentCyclesTest do
 
   test "no spreading itself indirectly within inline fragment" do
     assert_fails_rule(
-      """ 
+      """
       fragment fragA on Pet {
         ... on Dog {
           ...fragB
@@ -144,7 +143,7 @@ defmodule GraphQL.Validation.Rules.NoFragmentCyclesTest do
 
   test "no spreading itself deeply" do
     assert_fails_rule(
-      """ 
+      """
       fragment fragA on Dog { ...fragB }
       fragment fragB on Dog { ...fragC }
       fragment fragC on Dog { ...fragO }
@@ -155,48 +154,56 @@ defmodule GraphQL.Validation.Rules.NoFragmentCyclesTest do
       fragment fragP on Dog { ...fragA, ...fragX }
       """,
       %Rule{},
-      ["Cannot spread fragment fragA within itself via fragB, fragC, fragO, fragP.",
-       "Cannot spread fragment fragO within itself via fragP, fragX, fragY, fragZ."]
+      [
+        "Cannot spread fragment fragA within itself via fragB, fragC, fragO, fragP.",
+        "Cannot spread fragment fragO within itself via fragP, fragX, fragY, fragZ."
+      ]
     )
   end
 
   test "no spreading itself deeply two paths" do
     assert_fails_rule(
-      """ 
+      """
       fragment fragA on Dog { ...fragB, ...fragC }
       fragment fragB on Dog { ...fragA }
       fragment fragC on Dog { ...fragA }
       """,
       %Rule{},
-      ["Cannot spread fragment fragA within itself via fragB.",
-       "Cannot spread fragment fragA within itself via fragC."]
+      [
+        "Cannot spread fragment fragA within itself via fragB.",
+        "Cannot spread fragment fragA within itself via fragC."
+      ]
     )
   end
 
   test "no spreading itself deeply two paths -- alt traverse order" do
     assert_fails_rule(
-      """ 
+      """
       fragment fragA on Dog { ...fragC }
       fragment fragB on Dog { ...fragC }
       fragment fragC on Dog { ...fragA, ...fragB }
       """,
       %Rule{},
-      ["Cannot spread fragment fragA within itself via fragC.",
-       "Cannot spread fragment fragC within itself via fragB."]
+      [
+        "Cannot spread fragment fragA within itself via fragC.",
+        "Cannot spread fragment fragC within itself via fragB."
+      ]
     )
   end
 
   test "no spreading itself deeply and immediately" do
     assert_fails_rule(
-      """ 
+      """
       fragment fragA on Dog { ...fragB }
       fragment fragB on Dog { ...fragB, ...fragC }
       fragment fragC on Dog { ...fragA, ...fragB }
       """,
       %Rule{},
-      ["Cannot spread fragment fragB within itself.",
-       "Cannot spread fragment fragA within itself via fragB, fragC.",
-       "Cannot spread fragment fragB within itself via fragC."]
+      [
+        "Cannot spread fragment fragB within itself.",
+        "Cannot spread fragment fragA within itself via fragB, fragC.",
+        "Cannot spread fragment fragB within itself via fragC."
+      ]
     )
   end
 end

@@ -7,19 +7,21 @@ defmodule GraphQL.Mixfile do
   @repo_url "https://github.com/graphql-elixir/graphql"
 
   def project do
-    [app: :graphql,
-     version: @version,
-     elixir: "~> 1.15",
-     description: @description,
-     deps: deps(),
-     package: package(),
-     source_url: @repo_url,
-     homepage_url: @repo_url,
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     consolidate_protocols: true,
-     name: "GraphQL",
-     docs: [main: "GraphQL", logo: "logo.png", extras: ["README.md"]]]
+    [
+      app: :graphql,
+      version: @version,
+      elixir: "~> 1.15",
+      description: @description,
+      deps: deps(),
+      package: package(),
+      source_url: @repo_url,
+      homepage_url: @repo_url,
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
+      consolidate_protocols: true,
+      name: "GraphQL",
+      docs: [main: "GraphQL", logo: "logo.png", extras: ["README.md"]]
+    ]
   end
 
   def application do
@@ -37,14 +39,16 @@ defmodule GraphQL.Mixfile do
       {:ex_doc, "~> 0.11", only: :dev},
       {:inch_ex, "~> 0.5", only: :dev},
       {:dialyxir, "~> 0.3", only: [:dev]},
-      {:poison, "~> 1.5 or ~> 2.0", only: [:dev, :test]},
+      {:poison, "~> 1.5 or ~> 2.0", only: [:dev, :test]}
     ]
   end
 
   defp package do
-    [maintainers: ["Josh Price", "James Sadler", "Mark Olson", "Aaron Weiker", "Sean Abrahams"],
-     licenses: ["BSD"],
-     links: %{"GitHub" => @repo_url},
-     files: ~w(lib src/*.xrl src/*.yrl mix.exs *.md LICENSE)]
+    [
+      maintainers: ["Josh Price", "James Sadler", "Mark Olson", "Aaron Weiker", "Sean Abrahams"],
+      licenses: ["BSD"],
+      links: %{"GitHub" => @repo_url},
+      files: ~w(lib src/*.xrl src/*.yrl mix.exs *.md LICENSE)
+    ]
   end
 end

@@ -1,4 +1,3 @@
-
 defmodule GraphQL.Util.ArrayMapTest do
   use ExUnit.Case, async: true
 
@@ -14,7 +13,7 @@ defmodule GraphQL.Util.ArrayMapTest do
   end
 
   test "Access works with mix of nested Maps and ArrayMaps" do
-    nested =   %{:foo => ArrayMap.new(%{0 => %{:baz => ArrayMap.new(%{0 => %{quux: 123}})}})}
+    nested = %{:foo => ArrayMap.new(%{0 => %{:baz => ArrayMap.new(%{0 => %{quux: 123}})}})}
     expected = %{:foo => ArrayMap.new(%{0 => %{:baz => ArrayMap.new(%{0 => %{quux: 456}})}})}
 
     updated = put_in(nested, [:foo, 0, :baz, 0, :quux], 456)

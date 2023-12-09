@@ -10,9 +10,9 @@ defmodule GraphQL.Execution.Variables do
     reduce_values(schema, variable_definition_asts, input_map)
   end
 
-  @spec reduce_values(GraphQL.Schema.t, map, map) :: map
+  @spec reduce_values(GraphQL.Schema.t(), map, map) :: map
   defp reduce_values(schema, definition_asts, inputs) do
-    Enum.reduce(definition_asts, %{}, fn(ast, result) ->
+    Enum.reduce(definition_asts, %{}, fn ast, result ->
       key = ast.variable.name.value
       value = get_variable_value(schema, ast, inputs[key])
       Map.put(result, key, value)
@@ -28,7 +28,9 @@ defmodule GraphQL.Execution.Variables do
   defp value_for(%{defaultValue: default}, type, nil) do
     ASTValue.value_from_ast(%{value: default}, type, nil)
   end
+
   defp value_for(_, _, nil), do: nil
+
   defp value_for(_, type, input) do
     GraphQL.Types.serialize(%{type: type}, input)
   end

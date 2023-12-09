@@ -1,12 +1,12 @@
 defmodule GraphQL.Type.Union do
-  alias GraphQL.Execution.Completion  
+  alias GraphQL.Execution.Completion
 
   @type t :: %GraphQL.Type.Union{
-    name: binary,
-    description: binary | nil,
-    resolver: (any -> GraphQL.Type.ObjectType.t),
-    types: [GraphQL.Type.ObjectType.t]
-  }
+          name: binary,
+          description: binary | nil,
+          resolver: (any -> GraphQL.Type.ObjectType.t()),
+          types: [GraphQL.Type.ObjectType.t()]
+        }
   defstruct name: "", description: "", resolver: nil, types: []
 
   def new(map) do
@@ -19,7 +19,7 @@ defmodule GraphQL.Type.Union do
     union type.
     """
     def possible_type?(union, object) do
-      Enum.any?(union.types, fn(t) -> t.name === object.name end)
+      Enum.any?(union.types, fn t -> t.name === object.name end)
     end
 
     def possible_types(union, _schema) do
@@ -30,9 +30,10 @@ defmodule GraphQL.Type.Union do
     Returns the typedef for the object that was passed in, which could be a
     struct or map.
     """
-    def get_object_type(%{resolver: nil}=union, _, _) do
-      throw "Missing 'resolver' field on Union #{union.name}"
+    def get_object_type(%{resolver: nil} = union, _, _) do
+      throw("Missing 'resolver' field on Union #{union.name}")
     end
+
     def get_object_type(%{resolver: resolver}, object, _) do
       resolver.(object)
     end
@@ -52,4 +53,3 @@ defmodule GraphQL.Type.Union do
     end
   end
 end
-

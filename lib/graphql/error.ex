@@ -2,7 +2,7 @@ defmodule GraphQL.Errors do
   @moduledoc """
   Represents a set of errors that have occured.
   """
-  @type t :: %{errors: list(GraphQL.Error.t)}
+  @type t :: %{errors: list(GraphQL.Error.t())}
   defstruct errors: []
 
   @doc """
@@ -14,12 +14,12 @@ defmodule GraphQL.Errors do
       %GraphQL.Errors{errors: [%GraphQL.Error{line_number: 1,
           message: "GraphQL: syntax error before: '}' on line 1"}]}
   """
-  @spec new(list(GraphQL.Error.t)) :: GraphQL.Errors.t
+  @spec new(list(GraphQL.Error.t())) :: GraphQL.Errors.t()
   def new(errors) when is_list(errors) do
     %GraphQL.Errors{errors: errors}
   end
 
-  @spec new(GraphQL.Error.t) :: GraphQL.Errors.t
+  @spec new(GraphQL.Error.t()) :: GraphQL.Errors.t()
   def new(error) do
     %GraphQL.Errors{errors: [error]}
   end
@@ -35,6 +35,6 @@ defmodule GraphQL.Error do
       %GraphQL.Error{line_number: 1,
        message: "GraphQL: syntax error before: '}' on line 1"}
   """
-  @type t :: %{message: String.t}
+  @type t :: %{message: String.t()}
   defstruct message: "", line_number: 0
 end

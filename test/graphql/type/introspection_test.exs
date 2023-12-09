@@ -29,14 +29,14 @@ defmodule GraphQL.Type.IntrospectionTest do
       description: "Things",
       fields: %{
         id: %{type: %Int{}},
-        name: %{type: %String{}},
-      },
+        name: %{type: %String{}}
+      }
     }
 
     thing_input_type = %Input{
       name: "ThingInput",
       fields: %{
-        name: %{type: %String{}},
+        name: %{type: %String{}}
       }
     }
 
@@ -45,18 +45,18 @@ defmodule GraphQL.Type.IntrospectionTest do
       fields: %{
         thing: %{
           type: type,
-          resolve: fn(payload, _, _) ->
+          resolve: fn payload, _, _ ->
             payload
           end
-        },
-      },
+        }
+      }
     }
 
     input_type = %Input{
       name: "SaveThingInput",
       fields: %{
         id: %{type: %NonNull{ofType: %Int{}}},
-        params: %{type: %NonNull{ofType: thing_input_type}},
+        params: %{type: %NonNull{ofType: thing_input_type}}
       }
     }
 
@@ -76,7 +76,7 @@ defmodule GraphQL.Type.IntrospectionTest do
                 type: %NonNull{ofType: input_type}
               }
             },
-            resolve: fn(data, _, _) ->
+            resolve: fn data, _, _ ->
               data
             end
           }
@@ -84,17 +84,19 @@ defmodule GraphQL.Type.IntrospectionTest do
       }
     }
 
-    {:ok, result} = execute(schema, GraphQL.Type.Introspection.query)
-    assert Enum.find(result.data["__schema"]["types"], fn(type) -> type["name"] == "ThingInput" end)
+    {:ok, result} = execute(schema, GraphQL.Type.Introspection.query())
+
+    assert Enum.find(result.data["__schema"]["types"], fn type -> type["name"] == "ThingInput" end)
   end
 
   test "exposes descriptions on types and fields" do
-    schema = Schema.new(%{
-      query: %ObjectType{
-        name: "QueryRoot",
-        fields: %{onlyField: %{type: %String{}}}
-      }
-    })
+    schema =
+      Schema.new(%{
+        query: %ObjectType{
+          name: "QueryRoot",
+          fields: %{onlyField: %{type: %String{}}}
+        }
+      })
 
     query = """
     {
@@ -110,6 +112,7 @@ defmodule GraphQL.Type.IntrospectionTest do
     """
 
     {:ok, result} = execute(schema, query)
+
     assert_data(result, %{
       schemaType: %{
         name: "__Schema",
@@ -120,7 +123,8 @@ defmodule GraphQL.Type.IntrospectionTest do
           directives on the server, as well as the entry
           points for query, mutation,
           and subscription operations.
-          """ |> GraphQL.Util.Text.normalize,
+          """
+          |> GraphQL.Util.Text.normalize(),
         fields: [
           %{
             name: "directives",
@@ -128,7 +132,8 @@ defmodule GraphQL.Type.IntrospectionTest do
           },
           %{
             name: "mutationType",
-            description: "If this server supports mutation, the type that mutation operations will be rooted at."
+            description:
+              "If this server supports mutation, the type that mutation operations will be rooted at."
           },
           %{
             name: "queryType",
@@ -136,7 +141,8 @@ defmodule GraphQL.Type.IntrospectionTest do
           },
           %{
             name: "subscriptionType",
-            description: "If this server support subscription, the type that subscription operations will be rooted at.",
+            description:
+              "If this server support subscription, the type that subscription operations will be rooted at."
           },
           %{
             name: "types",

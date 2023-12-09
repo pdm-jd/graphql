@@ -1,10 +1,9 @@
 defmodule GraphQL.Schema.Generator do
-
   # TODO generate comments with the source types
 
   def generate(base_filename, source_schema) do
     {:ok, ast} = GraphQL.Lang.Parser.parse(source_schema)
-    module_name = base_filename |> Path.basename("_schema") |> Macro.camelize
+    module_name = base_filename |> Path.basename("_schema") |> Macro.camelize()
     {:ok, generate_module(module_name, ast)}
   end
 
@@ -47,7 +46,8 @@ defmodule GraphQL.Schema.Generator do
     """
   end
 
-  def walk_ast(field = %{kind: :FieldDefinition, arguments: args}) when is_list(args) and length(args) > 0 do
+  def walk_ast(field = %{kind: :FieldDefinition, arguments: args})
+      when is_list(args) and length(args) > 0 do
     """
     #{field.name.value}: %{
                 type: #{walk_ast(field.type)},
@@ -55,7 +55,8 @@ defmodule GraphQL.Schema.Generator do
                   #{args |> Enum.map(&walk_ast/1) |> Enum.join(",\n")}
                 }
               }
-    """ |> String.strip
+    """
+    |> String.strip()
   end
 
   def walk_ast(input = %{kind: :InputValueDefinition}) do
@@ -90,7 +91,7 @@ defmodule GraphQL.Schema.Generator do
             name: "#{type_def.name.value}",
             description: "#{type_def.name.value} description",
             values: %{
-              #{type_def.values |> Enum.map(fn (v) -> "#{v}: %{value: 0}" end) |> Enum.join(",\n          ")}
+              #{type_def.values |> Enum.map(fn v -> "#{v}: %{value: 0}" end) |> Enum.join(",\n          ")}
             }
           }
         end
@@ -149,7 +150,7 @@ defmodule GraphQL.Schema.Generator do
   def interfaces(type_def) do
     if i = Map.get(type_def, :interfaces) do
       ",
-        interfaces: [#{Enum.map_join(i, ", ", &(&1.name.value))}]"
+        interfaces: [#{Enum.map_join(i, ", ", & &1.name.value)}]"
     else
       ""
     end

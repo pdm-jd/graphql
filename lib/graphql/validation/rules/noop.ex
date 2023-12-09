@@ -1,6 +1,4 @@
-
 defmodule GraphQL.Validation.Rules.Noop do
-
   alias GraphQL.Lang.AST.Visitor
 
   defstruct name: "Noop"

@@ -1,4 +1,3 @@
-
 defmodule GraphQL.Lang.AST.TypeInfo do
   @moduledoc ~S"""
   TypeInfo maintains type metadata pertaining to the current node of a query AST,
@@ -8,6 +7,7 @@ defmodule GraphQL.Lang.AST.TypeInfo do
   """
 
   alias GraphQL.Util.Stack
+
   alias GraphQL.Type.{
     CompositeType,
     Introspection,
@@ -70,10 +70,13 @@ defmodule GraphQL.Lang.AST.TypeInfo do
     cond do
       field_node.name.value == Introspection.meta(:schema)[:name] && schema.query == parent_type ->
         Introspection.meta(:schema)
+
       field_node.name.value == Introspection.meta(:type)[:name] && schema.query == parent_type ->
         Introspection.meta(:type)
+
       field_node.name.value == Introspection.meta(:typename)[:name] ->
         Introspection.meta(:typename)
+
       true ->
         find_field_def(parent_type, field_node)
     end
@@ -82,8 +85,10 @@ defmodule GraphQL.Lang.AST.TypeInfo do
   defp find_field_def(%Interface{} = parent_type, field_node) do
     CompositeType.get_field(parent_type, field_node.name.value)
   end
+
   defp find_field_def(%ObjectType{} = parent_type, field_node) do
     CompositeType.get_field(parent_type, field_node.name.value)
   end
+
   defp find_field_def(_, _), do: nil
 end

@@ -107,9 +107,11 @@ defmodule GraphQL do
               {:ok, data, errors} -> {:ok, %{data: data, errors: errors}}
               {:error, errors} -> {:error, errors}
             end
+
           {:error, errors} ->
             {:error, errors}
         end
+
       {:error, errors} ->
         {:error, errors}
     end

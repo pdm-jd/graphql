@@ -20,7 +20,7 @@ defmodule GraphQL.Lang.Lexer do
   end
 
   def tokenize(input_string) do
-    {:ok, tokens, _} = :graphql_lexer.string input_string
+    {:ok, tokens, _} = :graphql_lexer.string(input_string)
     tokens
   end
 end

@@ -1,24 +1,28 @@
 defmodule GraphQL.Type.Int do
-  @max_int 2147483647
-  @min_int -2147483648
+  @max_int 2_147_483_647
+  @min_int -2_147_483_648
 
   @type t :: %GraphQL.Type.Int{name: binary, description: binary}
-  defstruct name: "Int", description:
-    """
-    The `Int` scalar type represents non-fractional signed whole numeric
-    values. Int can represent values between -(2^53 - 1) and 2^53 - 1 since
-    represented in JSON as double-precision floating point numbers specified
-    by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).
-    """ |> GraphQL.Util.Text.normalize
+  defstruct name: "Int",
+            description:
+              """
+              The `Int` scalar type represents non-fractional signed whole numeric
+              values. Int can represent values between -(2^53 - 1) and 2^53 - 1 since
+              represented in JSON as double-precision floating point numbers specified
+              by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).
+              """
+              |> GraphQL.Util.Text.normalize()
 
   def coerce(false), do: 0
   def coerce(true), do: 1
+
   def coerce(value) when is_binary(value) do
     case Float.parse(value) do
       :error -> nil
       {v, _} -> coerce(v)
     end
   end
+
   def coerce(value) do
     if value <= @max_int && value >= @min_int do
       if value < 0 do

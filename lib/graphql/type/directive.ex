@@ -22,7 +22,8 @@ defmodule GraphQL.Type.Directives do
         """
         Directs the executor to include this field or fragment
         only when the `if` argument is true.
-        """ |> Text.normalize,
+        """
+        |> Text.normalize(),
       locations: [:Field, :FragmentSpread, :InlineFragment],
       args: %{
         if: %{
@@ -42,7 +43,8 @@ defmodule GraphQL.Type.Directives do
         """
         Directs the executor to skip this field or fragment
         when the `if` argument is true.
-        """ |> Text.normalize,
+        """
+        |> Text.normalize(),
       locations: [:Field, :FragmentSpread, :InlineFragment],
       args: %{
         if: %{
@@ -58,10 +60,9 @@ defmodule GraphQL.Type.Directives do
   def deprecated do
     %Directive{
       name: "deprecated",
-      description:
-        """
-        Marks an element of a GraphQL schema as no longer supported.
-        """,
+      description: """
+      Marks an element of a GraphQL schema as no longer supported.
+      """,
       locations: [:FieldDefinition, :EnumValue],
       args: %{
         reason: %{

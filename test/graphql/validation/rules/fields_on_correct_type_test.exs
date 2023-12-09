@@ -1,5 +1,4 @@
-
-Code.require_file "../../../support/validations.exs", __DIR__
+Code.require_file("../../../support/validations.exs", __DIR__)
 
 defmodule GraphQL.Validation.Rules.FieldOnCorrectTypeTest do
   use ExUnit.Case, async: true
@@ -192,8 +191,8 @@ defmodule GraphQL.Validation.Rules.FieldOnCorrectTypeTest do
       %Rule{},
       [
         ~S(Cannot query field "nickname" on type "Pet". ) <>
-        ~S(However, this field exists on "Cat", "Dog". ) <>
-        ~S(Perhaps you meant to use an inline fragment?)
+          ~S(However, this field exists on "Cat", "Dog". ) <>
+          ~S(Perhaps you meant to use an inline fragment?)
       ]
     )
   end
@@ -231,8 +230,8 @@ defmodule GraphQL.Validation.Rules.FieldOnCorrectTypeTest do
       %Rule{},
       [
         ~S(Cannot query field "name" on type "CatOrDog". ) <>
-        ~S(However, this field exists on "Canine", "Cat", "Dog", "Being", "Pet". ) <>
-        ~S(Perhaps you meant to use an inline fragment?)
+          ~S(However, this field exists on "Canine", "Cat", "Dog", "Being", "Pet". ) <>
+          ~S(Perhaps you meant to use an inline fragment?)
       ]
     )
   end
@@ -252,5 +251,4 @@ defmodule GraphQL.Validation.Rules.FieldOnCorrectTypeTest do
       %Rule{}
     )
   end
-  
 end

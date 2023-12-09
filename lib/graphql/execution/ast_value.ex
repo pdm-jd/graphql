@@ -1,4 +1,3 @@
-
 defmodule GraphQL.Execution.ASTValue do
   alias GraphQL.Type.NonNull
   alias GraphQL.Type.List
@@ -10,15 +9,20 @@ defmodule GraphQL.Execution.ASTValue do
     value_from_ast(value_ast, inner_type, variable_values)
   end
 
-  def value_from_ast(%{value: obj=%{kind: :ObjectValue}}, type=%Input{}, variable_values) do
+  def value_from_ast(%{value: obj = %{kind: :ObjectValue}}, type = %Input{}, variable_values) do
     input_fields = CompositeType.get_fields(type)
-    field_asts = Enum.reduce(obj.fields, %{}, fn(ast, result) ->
-      Map.put(result, ast.name.value, ast)
-    end)
-    Enum.reduce(Map.keys(input_fields), %{}, fn(field_name, result) ->
+
+    field_asts =
+      Enum.reduce(obj.fields, %{}, fn ast, result ->
+        Map.put(result, ast.name.value, ast)
+      end)
+
+    Enum.reduce(Map.keys(input_fields), %{}, fn field_name, result ->
       field = Map.get(input_fields, field_name)
-      field_ast =  Map.get(field_asts, to_string(field_name)) # this feels... brittle.
+      # this feels... brittle.
+      field_ast = Map.get(field_asts, to_string(field_name))
       inner_result = value_from_ast(field_ast, field.type, variable_values)
+
       case inner_result do
         nil -> result
         _ -> Map.put(result, field_name, inner_result)
@@ -38,16 +42,20 @@ defmodule GraphQL.Execution.ASTValue do
   def value_from_ast(_, %Input{}, _), do: nil
 
   def value_from_ast(%{value: %{kind: :ListValue, values: values_ast}}, type, _) do
-    GraphQL.Types.parse_value(type, Enum.map(values_ast, fn(value_ast) ->
-      value_ast.value
-    end))
+    GraphQL.Types.parse_value(
+      type,
+      Enum.map(values_ast, fn value_ast ->
+        value_ast.value
+      end)
+    )
   end
 
   def value_from_ast(value_ast, %List{ofType: inner_type}, variable_values) do
     [value_from_ast(value_ast, inner_type, variable_values)]
   end
 
-  def value_from_ast(nil, _, _), do: nil # remove once NonNull is actually done..
+  # remove once NonNull is actually done..
+  def value_from_ast(nil, _, _), do: nil
 
   def value_from_ast(value_ast, type, variable_values) when is_atom(type) do
     value_from_ast(value_ast, type.type, variable_values)
